@@ -18,7 +18,7 @@ class Naranja extends THREE.Object3D {
     var sphereGeom = new THREE.SphereGeometry( 1.5, 100, 100 ); //radio, paralelos y meridianos (norte a sur)
     // Como material se crea uno a partir de un color
     var sphereMat = new THREE.MeshPhongMaterial({
-      color: 0xffb900,
+      color: 0xFF9300,
       flatShading: true,
     });
 

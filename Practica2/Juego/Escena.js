@@ -10,6 +10,7 @@ import { TrackballControls } from '../libs/TrackballControls.js'
 import { Manzana } from './Modelos/Manzana.js'
 import { Uva } from './Modelos/Uva.js'
 import { Naranja } from './Modelos/Naranja.js'
+import { Snake } from './Snake.js'
 
 /// La clase fachada del modelo
 /**
@@ -22,36 +23,24 @@ import { Naranja } from './Modelos/Naranja.js'
   constructor (myCanvas) { 
     super();
     
-    // Lo primero, crear el visualizador, pasándole el lienzo sobre el que realizar los renderizados.
     this.renderer = this.createRenderer(myCanvas);
     
-    // Se crea la interfaz gráfica de usuario
     this.gui = this.createGUI ();
     
-    // Construimos los distinos elementos que tendremos en la escena
-    
-    // Todo elemento que se desee sea tenido en cuenta en el renderizado de la escena debe pertenecer a esta. Bien como hijo de la escena (this en esta clase) o como hijo de un elemento que ya esté en la escena.
-    // Tras crear cada elemento se añadirá a la escena con   this.add(variable)
     this.createLights ();
     
-    // Tendremos una cámara con un control de movimiento con el ratón
     this.createCamera ();
     
-    // Un suelo 
-    //this.createGround ();
+    this.createGround ();
     
-    // Y unos ejes. Imprescindibles para orientarnos sobre dónde están las cosas
     this.axis = new THREE.AxesHelper (5);
     this.add (this.axis);
     
     
-    // Por último creamos el modelo.
-    // El modelo puede incluir su parte de la interfaz gráfica de usuario. Le pasamos la referencia a 
-    // la gui y el texto bajo el que se agruparán los controles de la interfaz que añada el modelo.
-    
-    this.model = new Naranja(this.gui, "");
+    //this.model = new Naranja(this.gui, "");
     //this.model = new Uva(this.gui, "");
     //this.model = new Manzana(this.gui, "");
+    this.model = new Snake();
     
     this.add (this.model);
   }
@@ -87,7 +76,7 @@ import { Naranja } from './Modelos/Naranja.js'
     var geometryGround = new THREE.BoxGeometry (50,0.2,50);
     
     // El material se hará con una textura de madera
-    var texture = new THREE.TextureLoader().load('../imgs/cesped.jpg');
+    var texture = new THREE.TextureLoader().load('./Imagenes/cesped2.0.jpg');
     var materialGround = new THREE.MeshPhongMaterial ({map: texture});
     
     // Ya se puede construir el Mesh
@@ -212,8 +201,7 @@ import { Naranja } from './Modelos/Naranja.js'
     // Si no existiera esta línea,  update()  se ejecutaría solo la primera vez.
     requestAnimationFrame(() => this.update())
   }
-}
-
+ }
 
 /// La función   main
 $(function () {

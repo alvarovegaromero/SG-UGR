@@ -10,7 +10,7 @@ class Manzana extends THREE.Object3D {
     // Se crea el pedunculo, pero no se añade a la escena, solamente se crea un mesh resultante de geometría y material
     var pedunculo = new Pedunculo();
 
-    pedunculo.meshPedunculo.position.y = 4;  // subir el rabo
+    pedunculo.meshPedunculo.position.y = 3.5;  // subir el rabo
     this.add(pedunculo.meshPedunculo);
 
     var manzana_sin_rabo = this.createManzana();
@@ -23,7 +23,7 @@ class Manzana extends THREE.Object3D {
 
   createManzana()
   {
-    var texture = new THREE.TextureLoader().load('../imgs/manzana.jpg');
+    var texture = new THREE.TextureLoader().load('./Imagenes/manzana.jpg');
     var material_manzana = new THREE.MeshPhysicalMaterial({map: texture, roughness: 0, reflectivity: 0.35});
 
     var shapeManzana = new THREE.Shape();
