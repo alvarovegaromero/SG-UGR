@@ -5,8 +5,6 @@ class Uva extends THREE.Object3D {
   constructor(gui,titleGui) {
     super();
     
-    this.createGUI(gui,titleGui);
-
     var uva = this.createUva(); //Uva realmente es un racimo de uvas
     
     this.add (uva);
@@ -17,9 +15,10 @@ class Uva extends THREE.Object3D {
     // Un Mesh se compone de geometría y material
     var sphereGeom = new THREE.SphereGeometry( 1.5, 100, 100 ); //radio, paralelos y meridianos (norte a sur)
     // Como material se crea uno a partir de un color
-    var sphereMat = new THREE.MeshPhongMaterial({
+    var sphereMat = new THREE.MeshPhysicalMaterial({
       color: 0xad00ad,
-      flatShading: true,
+      roughness: 0, 
+      reflectivity: 0.35
     });
 
     // Ya podemos construir el Mesh
@@ -27,20 +26,12 @@ class Uva extends THREE.Object3D {
     // Y añadirlo como hijo del Object3D (el this)
     this.add (this.sphere);
 
-    // Las geometrías se crean centradas en el origen.
-    // Como queremos que el sistema de referencia esté en la base,
-    // subimos el Mesh de la caja la mitad de su altura
     this.sphere.scale.y = 1.25;
     this.sphere.position.y = 1.5*1.25;
   }
   
-  createGUI (gui,titleGui) {
-
-  }
-  
   
   update () {
-    // No hay nada que actualizar ya que la apertura de la grapadora se ha actualizado desde la interfaz
   }
 }
 

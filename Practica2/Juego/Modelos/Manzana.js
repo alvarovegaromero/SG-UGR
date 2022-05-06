@@ -2,11 +2,9 @@ import * as THREE from '../../libs/three.module.js'
 import { Pedunculo } from './Pedunculo.js'
 
 class Manzana extends THREE.Object3D {
-  constructor(gui,titleGui) {
+  constructor() {
     super();
     
-    this.createGUI(gui,titleGui);
-
     // Se crea el pedunculo, pero no se añade a la escena, solamente se crea un mesh resultante de geometría y material
     var pedunculo = new Pedunculo();
 
@@ -44,11 +42,8 @@ class Manzana extends THREE.Object3D {
     return meshManzana;
   }
   
-  createGUI (gui,titleGui) {
-  }
   
   update () {
-    // No hay nada que actualizar ya que la apertura de la grapadora se ha actualizado desde la interfaz
   }
 }
 

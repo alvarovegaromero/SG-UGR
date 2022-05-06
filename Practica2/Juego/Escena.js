@@ -10,6 +10,7 @@ import { TrackballControls } from '../libs/TrackballControls.js'
 import { Manzana } from './Modelos/Manzana.js'
 import { Uva } from './Modelos/Uva.js'
 import { Naranja } from './Modelos/Naranja.js'
+import { Pera } from './Modelos/Pera.js'
 import { Snake } from './Snake.js'
 
 /// La clase fachada del modelo
@@ -37,10 +38,11 @@ import { Snake } from './Snake.js'
     this.add (this.axis);
     
     
-    //this.model = new Naranja(this.gui, "");
-    //this.model = new Uva(this.gui, "");
-    //this.model = new Manzana(this.gui, "");
-    this.model = new Snake();
+    this.model = new Naranja();
+    //this.model = new Uva();
+    //this.model = new Manzana();
+    //this.model = new Pera();
+    //this.model = new Snake();
     
     this.add (this.model);
   }
