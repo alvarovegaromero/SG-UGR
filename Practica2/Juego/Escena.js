@@ -7,15 +7,16 @@ import { TrackballControls } from '../libs/TrackballControls.js'
 
 // Clases de mi proyecto
 
-import { Manzana } from './Manzana.js'
+import { Manzana } from './Modelos/Manzana.js'
+import { Uva } from './Modelos/Uva.js'
+import { Naranja } from './Modelos/Naranja.js'
 
- 
 /// La clase fachada del modelo
 /**
  * Usaremos una clase derivada de la clase Scene de Three.js para llevar el control de la escena y de todo lo que ocurre en ella.
  */
 
-class MyScene extends THREE.Scene {
+ class MyScene extends THREE.Scene {
   // Recibe el  div  que se ha creado en el  html  que va a ser el lienzo en el que mostrar
   // la visualización de la escena
   constructor (myCanvas) { 
@@ -37,7 +38,7 @@ class MyScene extends THREE.Scene {
     this.createCamera ();
     
     // Un suelo 
-    this.createGround ();
+    //this.createGround ();
     
     // Y unos ejes. Imprescindibles para orientarnos sobre dónde están las cosas
     this.axis = new THREE.AxesHelper (5);
@@ -47,7 +48,11 @@ class MyScene extends THREE.Scene {
     // Por último creamos el modelo.
     // El modelo puede incluir su parte de la interfaz gráfica de usuario. Le pasamos la referencia a 
     // la gui y el texto bajo el que se agruparán los controles de la interfaz que añada el modelo.
-    this.model = new Manzana(this.gui, "");
+    
+    this.model = new Naranja(this.gui, "");
+    //this.model = new Uva(this.gui, "");
+    //this.model = new Manzana(this.gui, "");
+    
     this.add (this.model);
   }
   

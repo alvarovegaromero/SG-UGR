@@ -1,5 +1,4 @@
-
-import * as THREE from '../libs/three.module.js'
+import * as THREE from '../../libs/three.module.js'
 
 class Pedunculo extends THREE.Object3D {
   constructor() {

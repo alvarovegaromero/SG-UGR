@@ -1,5 +1,4 @@
-
-import * as THREE from '../libs/three.module.js'
+import * as THREE from '../../libs/three.module.js'
 import { Pedunculo } from './Pedunculo.js'
 
 class Manzana extends THREE.Object3D {
@@ -39,14 +38,14 @@ class Manzana extends THREE.Object3D {
     manzanaGeometry.scale(0.5, 0.5, 0.5);  // reducirla en general
 
     var meshManzana = new THREE.Mesh(manzanaGeometry, material_manzana);
-    return meshManzana;
 
+    meshManzana.position.y -= 0.25;
+
+    return meshManzana;
   }
   
   createGUI (gui,titleGui) {
-
   }
-  
   
   update () {
     // No hay nada que actualizar ya que la apertura de la grapadora se ha actualizado desde la interfaz
