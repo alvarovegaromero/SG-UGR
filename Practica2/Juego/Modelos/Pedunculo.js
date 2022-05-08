@@ -1,7 +1,7 @@
 import * as THREE from '../../libs/three.module.js'
 
 class Pedunculo extends THREE.Object3D {
-  constructor() {
+  constructor(colorP = 0x95b211) { //Añadimos color como parametro opcional
     super();
     
     // El material se usa desde varios métodos. Por eso se alamacena en un atributo
@@ -9,7 +9,7 @@ class Pedunculo extends THREE.Object3D {
     // A la base no se accede desde ningún método. Se almacena en una variable local del constructor.
     //var pedunculo = this.createPedunculo();
 
-    var material = new THREE.MeshPhongMaterial({color: 0x95b211});
+    var material = new THREE.MeshPhongMaterial({color: colorP});
 
     var path = new THREE.CatmullRomCurve3([
       new THREE.Vector3(0,0,0),

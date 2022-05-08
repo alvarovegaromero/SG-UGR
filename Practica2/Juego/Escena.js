@@ -11,7 +11,10 @@ import { Manzana } from './Modelos/Manzana.js'
 import { Uva } from './Modelos/Uva.js'
 import { Naranja } from './Modelos/Naranja.js'
 import { Pera } from './Modelos/Pera.js'
+import { Bomba } from './Modelos/Bomba.js'
 import { Snake } from './Snake.js'
+
+//import { PedunculoNaranja } from './Modelos/pedunculoNaranja.js' - Hacemos import en naranja
 
 /// La clase fachada del modelo
 /**
@@ -32,13 +35,13 @@ import { Snake } from './Snake.js'
     
     this.createCamera ();
     
-    this.createGround ();
+    //this.createGround ();
     
     this.axis = new THREE.AxesHelper (5);
     this.add (this.axis);
     
-    
-    this.model = new Naranja();
+    this.model = new Bomba();
+    //this.model = new Naranja();
     //this.model = new Uva();
     //this.model = new Manzana();
     //this.model = new Pera();
@@ -196,7 +199,7 @@ import { Snake } from './Snake.js'
     this.cameraControl.update();
     
     // Se actualiza el resto del modelo
-    this.model.update();
+    //this.model.update();
     
     // Este método debe ser llamado cada vez que queramos visualizar la escena de nuevo.
     // Literalmente le decimos al navegador: "La próxima vez que haya que refrescar la pantalla, llama al método que te indico".
