@@ -40,9 +40,9 @@ import { Snake } from './Snake.js'
     this.axis = new THREE.AxesHelper (5);
     this.add (this.axis);
     
-    this.model = new Bomba();
+    //this.model = new Bomba();
     //this.model = new Naranja();
-    //this.model = new Uva();
+    this.model = new Uva();
     //this.model = new Manzana();
     //this.model = new Pera();
     //this.model = new Snake();

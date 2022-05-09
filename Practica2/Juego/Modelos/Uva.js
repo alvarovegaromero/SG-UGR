@@ -15,7 +15,9 @@ class Uva extends THREE.Object3D {
     // Un Mesh se compone de geometría y material
     var sphereGeom = new THREE.SphereGeometry( 1.5, 100, 100 ); //radio, paralelos y meridianos (norte a sur)
     // Como material se crea uno a partir de un color
+    var texture = new THREE.TextureLoader().load('./Imagenes/uva.jpg'); //añadirle textura de naranja
     var sphereMat = new THREE.MeshPhysicalMaterial({
+      map: texture,
       color: 0xad00ad,
       roughness: 0, 
       reflectivity: 0.35
@@ -27,7 +29,8 @@ class Uva extends THREE.Object3D {
     this.add (this.sphere);
 
     this.sphere.scale.y = 1.25;
-    this.sphere.position.y = 1.5*1.25;
+    this.sphere.scale.set(0.5, 0.7, 0.5);
+    this.sphere.position.y = 1;
   }
   
   
