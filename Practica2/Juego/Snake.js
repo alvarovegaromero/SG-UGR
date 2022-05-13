@@ -2,12 +2,13 @@ import * as THREE from '../libs/three.module.js'
 
 class Snake extends THREE.Object3D{
     
-    constructor() {
+    constructor(dimensionesX, dimensionesZ) {
         super();
 
         // Definimos los tamaños de los cubos de la serpiente
-        this.tamX = 5.5;
-        this.tamY = 5.5;
+        this.tamX = 2.7;
+        this.tamY = 1;
+        this.tamZ = 2.8;
         
         // Enumerado para gestionar las direcciones del Snake
         this.Direcciones = {
@@ -18,30 +19,30 @@ class Snake extends THREE.Object3D{
         }
 
         // Control del inicio / fin del juego
-        this.finDelJuego = false; // Booleano para avisar si se ha perdido el juego
-        this.InicioDelJuego = false; // Esperamos que usuario de a un botón para jugar al juego
+        this.finJuego = false; // Booleano para avisar si se ha perdido el juego
+        this.inicioJuego = false; // Esperamos que usuario de a un botón para jugar al juego
 
         // Propiedades de la serpiente
         this.direccion = this.Direcciones.DERECHA; // Inicialmente, la serpiente empieza mirando a la derecha
         this.velocidadSerpiente = 1; //Velocidad de la serpiente
         
         //Posicion
-        this.listaPosiciones = []; //Inicialmente solo tenemos la cabeza
+        this.listaPosiciones = []; //Inicialmente solo tenemos la cabeza. Será como una "pila invertida" (el más antiguo, tiene el indice mas alto)
 
-        this.numPosiciones = 1; //Inicialmente solo tenemos un segmento, que es la cabeza.
+        this.segmentosSnake = 1; //Inicialmente solo tenemos un segmento, que es la cabeza. Conforme crezca, se incrementa
         
-
+        this.crearMatriz(dimensionesX, dimensionesZ);
 
         ///////////////////////////////
         // CREAR LA CABESA - PIEZA INICIAL
 
-        var cabezaGeometria = new THREE.BoxGeometry(this.tamX, this.tamY, 5);
+        var cabezaGeometria = new THREE.BoxGeometry(this.tamX, this.tamY, this.tamZ);
         var cabezaMaterial = new THREE.MeshPhongMaterial({color: 0x2f89c2});
-        cabezaGeometria.translate(-this.tamX/2,0,-this.tamX/2);
+        cabezaGeometria.translate(-this.tamX/2, this.tamY/2, this.tamZ/2);
         var cabeza = new THREE.Mesh(cabezaGeometria, cabezaMaterial);
         this.add(cabeza);
 
-        this.listaPosiciones.push(cabeza);
+        this.listaPosiciones.push([]);
 
         ///////////////////////////////
 
@@ -49,7 +50,27 @@ class Snake extends THREE.Object3D{
 
     }
 
+    crearMatriz(dimensionesX, dimensionesZ){
+        //Tendremos una matriz con booleanos. True es que hay un segmento de la serpiente ocupando esa casilla y false si no
+        this.matriz = new Array(dimensionesX+2); //+2 para el borde
+
+        for(var i=0; i < this.matriz.length ; i++){
+            this.matriz[i] = new Array(dimensionesZ+2); //+2 para el borde
+
+            for(var j = 0 ; j < this.matriz[i].length ; j++){
+                this.matriz[i][j] = false;
+            }
+        }
+    }
+
     moverSerpiente() {
+
+        var cabeza = this.listaPosiciones[this.segmentosSnake-1];
+
+        for(var i = this.segmentosSnake-1; i > 0 ; i--) {
+            this.listaPosiciones[i].position.x = 
+
+        }
 
         if (this.direccion == this.Direcciones.DERECHA)
             this.listaPosiciones[0] += this.tamX;
@@ -64,6 +85,14 @@ class Snake extends THREE.Object3D{
             this.listaPosiciones[0] += this.tamZ;
     }
 
+    empezarJuego(){
+        this.inicioJuego = true;
+    }
+
+    perderJuego(){
+        this.finJuego = true;
+    }
+
     incrementarTamanio() { // Fruta asociada = Manzana
         
     }
@@ -73,15 +102,11 @@ class Snake extends THREE.Object3D{
     }
 
     aumentarVelocidad() { // Fruta asociada = Pera
-
+        this.velocidadSerpiente += 0.1;
     }
 
     reducirVelocidad() {  // Fruta asociada = Naranja
-        
-    }
-
-    morir() { //Si la serpiente se choca con una pared o come una fruta prohibida, muere - Fruta asociada = Bomba
-        
+        this.velocidadSerpiente -= 0.1; 
     }
     
     cambiarDireccion(direccion_elegida){
@@ -105,6 +130,14 @@ class Snake extends THREE.Object3D{
             
         if (this.direccion == this.Direcciones.IZQUIERDA && direccion_elegida != this.Direcciones.DERECHA)
             this.direccion = direccion_elegida
+    }
+
+    comprobarChoqueSerpiente(){
+
+    }
+
+    comprobarChoqueMuro(){
+
     }
 
     update () {

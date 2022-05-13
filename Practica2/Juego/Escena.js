@@ -35,17 +35,22 @@ import { Snake } from './Snake.js'
     
     this.createCamera ();
     
-    //this.createGround ();
+    this.createGround ();
     
+    /* Ejes de coordenadas. No los usaremos pero los dejo para referencias futuras
     this.axis = new THREE.AxesHelper (5);
     this.add (this.axis);
-    
+    */
+
+    this.snake = new Snake();
+    this.add(this.snake);
+
     //this.model = new Bomba();
     //this.model = new Naranja();
-    this.model = new Uva();
+    //this.model = new Uva();
     //this.model = new Manzana();
     //this.model = new Pera();
-    //this.model = new Snake();
+    this.model = new Snake();
     
     this.add (this.model);
   }
@@ -57,7 +62,7 @@ import { Snake } from './Snake.js'
     //   Los planos de recorte cercano y lejano
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
     // También se indica dónde se coloca
-    this.camera.position.set (6, 3, 6);
+    this.camera.position.set (0, 60, 0); //Colocarlo en el eje y para ver el mapa desde arriba
     // Y hacia dónde mira
     var look = new THREE.Vector3 (0,0,0);
     this.camera.lookAt(look);
@@ -66,14 +71,20 @@ import { Snake } from './Snake.js'
     // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
     this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
     
+    /* Para poder mover la cam. Lo comento para quitarlo
+    Pero lo dejo por si tuvieramos que ver algo
     // Se configuran las velocidades de los movimientos
     this.cameraControl.rotateSpeed = 5;
     this.cameraControl.zoomSpeed = -2;
     this.cameraControl.panSpeed = 0.5;
     // Debe orbitar con respecto al punto de mira de la cámara
     this.cameraControl.target = look;
+    */
   }
   
+  //
+  // crear mapa ¿alguna cosa mas?
+  //
   createGround () {
     // El suelo es un Mesh, necesita una geometría y un material.
     
@@ -81,7 +92,7 @@ import { Snake } from './Snake.js'
     var geometryGround = new THREE.BoxGeometry (50,0.2,50);
     
     // El material se hará con una textura de madera
-    var texture = new THREE.TextureLoader().load('./Imagenes/cesped2.0.jpg');
+    var texture = new THREE.TextureLoader().load('./Imagenes/cesped3.0.jpg');
     var materialGround = new THREE.MeshPhongMaterial ({map: texture});
     
     // Ya se puede construir el Mesh
@@ -104,22 +115,16 @@ import { Snake } from './Snake.js'
     // En este caso la intensidad de la luz y si se muestran o no los ejes
     this.guiControls = {
       // En el contexto de una función   this   alude a la función
-      lightIntensity : 0.5,
-      axisOnOff : true
+      lightIntensity : 0.4,
     }
 
     // Se crea una sección para los controles de esta clase
-    var folder = gui.addFolder ('Luz y Ejes');
+    var folder = gui.addFolder ('Luz ambiental');
     
     // Se le añade un control para la intensidad de la luz
     folder.add (this.guiControls, 'lightIntensity', 0, 1, 0.1)
       .name('Intensidad de la Luz : ')
       .onChange ( (value) => this.setLightIntensity (value) );
-    
-    // Y otro para mostrar u ocultar los ejes
-    folder.add (this.guiControls, 'axisOnOff')
-      .name ('Mostrar ejes : ')
-      .onChange ( (value) => this.setAxisVisible (value) );
     
     return gui;
   }
@@ -138,16 +143,12 @@ import { Snake } from './Snake.js'
     // Si no se le da punto de mira, apuntará al (0,0,0) en coordenadas del mundo
     // En este caso se declara como   this.atributo   para que sea un atributo accesible desde otros métodos.
     this.spotLight = new THREE.SpotLight( 0xffffff, this.guiControls.lightIntensity );
-    this.spotLight.position.set( 60, 60, 40 );
+    this.spotLight.position.set( 0, 60, 0 ); //Desde la camara a abajo
     this.add (this.spotLight);
   }
   
   setLightIntensity (valor) {
     this.spotLight.intensity = valor;
-  }
-  
-  setAxisVisible (valor) {
-    this.axis.visible = valor;
   }
   
   createRenderer (myCanvas) {
@@ -191,15 +192,46 @@ import { Snake } from './Snake.js'
     this.renderer.setSize (window.innerWidth, window.innerHeight);
   }
 
+  establecerMovimiento(){
+    
+  }
+
+  comprobarComerComida(){
+    
+  }
+
+  movimientoSnake (evento) {
+
+    var x = evento.which || evento.keyCode;
+    if(x == '38'){ // key up
+      scene.setMovement(3);
+    }
+    else if(x == '40'){ // key down
+      scene.setMovement(1);
+    }
+    else if(x == '37'){ // key left
+      scene.setMovement(2);
+    }
+    else if(x == '39'){ // key right
+      scene.setMovement(0);
+    }
+    else if(x == '82'){ // 'r' para reiniciar
+      if(scene.snake.gameOver){
+        scene = new MyScene (renderer.domElement);
+        setMessage("Pulsa una arrow key para empezar");
+      }
+    }
+  }
+
   update () {
     // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
     this.renderer.render (this, this.getCamera());
 
     // Se actualiza la posición de la cámara según su controlador
-    this.cameraControl.update();
+    //this.cameraControl.update(); - Comentado no permite hacer zoom con rueda
     
-    // Se actualiza el resto del modelo
-    //this.model.update();
+    this.snake.update();
+    this.comprobarComerComida();
     
     // Este método debe ser llamado cada vez que queramos visualizar la escena de nuevo.
     // Literalmente le decimos al navegador: "La próxima vez que haya que refrescar la pantalla, llama al método que te indico".
@@ -216,7 +248,8 @@ $(function () {
 
   // Se añaden los listener de la aplicación. En este caso, el que va a comprobar cuándo se modifica el tamaño de la ventana de la aplicación.
   window.addEventListener ("resize", () => scene.onWindowResize());
-  
+  window.addEventListener ("keydown", () => scene.movimientoSnake());
+
   // Que no se nos olvide, la primera visualización.
   scene.update();
 });
