@@ -21,12 +21,28 @@ import { Snake } from './Snake.js'
  * Usaremos una clase derivada de la clase Scene de Three.js para llevar el control de la escena y de todo lo que ocurre en ella.
  */
 
+///////////////////////////////
+    // Enumerado para gestionar las direcciones del Snake
+  var Direcciones = {
+      ARRIBA: 0,
+      DERECHA: 1,
+      ABAJO: 2,
+      IZQUIERDA: 3
+}
+
  class MyScene extends THREE.Scene {
   // Recibe el  div  que se ha creado en el  html  que va a ser el lienzo en el que mostrar
   // la visualización de la escena
   constructor (myCanvas) { 
     super();
+
+    this.tamTableroX = 17;
+    this.tamTableroY = 17;
     
+    this.numeroCasillasX = 16;
+    this.numeroCasillasY = 16;
+
+
     this.renderer = this.createRenderer(myCanvas);
     
     this.gui = this.createGUI ();
@@ -38,11 +54,12 @@ import { Snake } from './Snake.js'
     this.createGround ();
     
     /* Ejes de coordenadas. No los usaremos pero los dejo para referencias futuras
+    */
     this.axis = new THREE.AxesHelper (5);
     this.add (this.axis);
-    */
+    
 
-    this.snake = new Snake();
+    this.snake = new Snake(this.tamTableroX, this.tamTableroY, this.numeroCasillasX, this.numeroCasillasY);
     this.add(this.snake);
 
     //this.model = new Bomba();
@@ -50,9 +67,8 @@ import { Snake } from './Snake.js'
     //this.model = new Uva();
     //this.model = new Manzana();
     //this.model = new Pera();
-    this.model = new Snake();
     
-    this.add (this.model);
+    //this.add (this.model);
   }
   
   createCamera () {
@@ -62,9 +78,9 @@ import { Snake } from './Snake.js'
     //   Los planos de recorte cercano y lejano
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
     // También se indica dónde se coloca
-    this.camera.position.set (0, 60, 0); //Colocarlo en el eje y para ver el mapa desde arriba
+    this.camera.position.set (this.tamTableroX/2, this.tamTableroY/2, 22.5); //Colocarlo en el eje y para ver el mapa desde arriba
     // Y hacia dónde mira
-    var look = new THREE.Vector3 (0,0,0);
+    var look = new THREE.Vector3 (this.tamTableroX/2,this.tamTableroY/2,0);
     this.camera.lookAt(look);
     this.add (this.camera);
     
@@ -72,14 +88,14 @@ import { Snake } from './Snake.js'
     this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
     
     /* Para poder mover la cam. Lo comento para quitarlo
-    Pero lo dejo por si tuvieramos que ver algo
+    Pero lo dejo por si tuvieramos que ver algo */
     // Se configuran las velocidades de los movimientos
     this.cameraControl.rotateSpeed = 5;
     this.cameraControl.zoomSpeed = -2;
     this.cameraControl.panSpeed = 0.5;
     // Debe orbitar con respecto al punto de mira de la cámara
     this.cameraControl.target = look;
-    */
+    
   }
   
   //
@@ -89,7 +105,7 @@ import { Snake } from './Snake.js'
     // El suelo es un Mesh, necesita una geometría y un material.
     
     // La geometría es una caja con muy poca altura
-    var geometryGround = new THREE.BoxGeometry (50,0.2,50);
+    var geometryGround = new THREE.BoxGeometry (this.tamTableroX,this.tamTableroY, 0.2); 
     
     // El material se hará con una textura de madera
     var texture = new THREE.TextureLoader().load('./Imagenes/cesped3.0.jpg');
@@ -100,8 +116,12 @@ import { Snake } from './Snake.js'
     
     // Todas las figuras se crean centradas en el origen.
     // El suelo lo bajamos la mitad de su altura para que el origen del mundo se quede en su lado superior
-    ground.position.y = -0.1;
-    
+    ground.position.z = -0.1;
+
+    ground.position.x += this.tamTableroX/2;
+    ground.position.y += this.tamTableroY/2;
+
+
     // Que no se nos olvide añadirlo a la escena, que en este caso es  this
     this.add (ground);
   }
@@ -143,7 +163,7 @@ import { Snake } from './Snake.js'
     // Si no se le da punto de mira, apuntará al (0,0,0) en coordenadas del mundo
     // En este caso se declara como   this.atributo   para que sea un atributo accesible desde otros métodos.
     this.spotLight = new THREE.SpotLight( 0xffffff, this.guiControls.lightIntensity );
-    this.spotLight.position.set( 0, 60, 0 ); //Desde la camara a abajo
+    this.spotLight.position.set( 0, 0, 60 ); //Desde la camara a abajo
     this.add (this.spotLight);
   }
   
@@ -200,6 +220,8 @@ import { Snake } from './Snake.js'
     
   }
 
+  // snakeMovement(script) -> setMovement (scene) -> changeDirection(snake) -> moverSerpiente
+
   movimientoSnake (evento) {
 
     var x = evento.which || evento.keyCode;
@@ -218,7 +240,6 @@ import { Snake } from './Snake.js'
     else if(x == '82'){ // 'r' para reiniciar
       if(scene.snake.gameOver){
         scene = new MyScene (renderer.domElement);
-        setMessage("Pulsa una arrow key para empezar");
       }
     }
   }
@@ -228,7 +249,7 @@ import { Snake } from './Snake.js'
     this.renderer.render (this, this.getCamera());
 
     // Se actualiza la posición de la cámara según su controlador
-    //this.cameraControl.update(); - Comentado no permite hacer zoom con rueda
+    this.cameraControl.update(); //- Comentado no permite hacer zoom con rueda
     
     this.snake.update();
     this.comprobarComerComida();
@@ -253,3 +274,5 @@ $(function () {
   // Que no se nos olvide, la primera visualización.
   scene.update();
 });
+
+export { Direcciones }
