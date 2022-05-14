@@ -12,27 +12,32 @@ class Snake extends THREE.Object3D{
         this.tamY = 1;
         this.tamZ = 1;
 
+        //Guardamos los tamaños de la matriz del tablero
+        this.tamMatrizX = tamMatrizX;
+        this.tamMatrizY = tamMatrizY;
+
         ///////////////////////////////
         // Control del inicio / fin del juego
         this.finJuego = false; // Booleano para avisar si se ha perdido el juego
         this.inicioJuego = true; // Esperamos que usuario de a un botón para jugar al juego
+        //OJO INICIO A TRUE PARA PRUEBAS
+
 
         ///////////////////////////////
         // Propiedades iniciales de la serpiente
         this.direccion = Direcciones.IZQUIERDA; // Inicialmente, la serpiente empieza mirando a la derecha
-        this.velocidadSerpiente = 2; //Velocidad de la serpiente
+        this.velocidadSerpiente = 1; //Velocidad de la serpiente
         
         ///////////////////////////////
         //Crear estructuras para la gestion de la serpiente
-        //Son como "pilas invertida" (el más antiguo - la cabeza, tiene el indice mas alto)
         this.segmentosSnake = []; //Guarda cada mesh que forma un segmento en el snake
     
-        this.crearMatriz(tamMatrizX, tamMatrizY);
+        this.crearMatriz();
 
         ///////////////////////////////
         // Para controlar el movimiento de la serpiente
         this.reloj = new THREE.Clock(); 
-        this.contadorSegundos = 1;
+        this.contadorSegundos = 1; //Velocidad inicial de la serpiente
 
         ///////////////////////////////
         // CREAR LA CABESA - PIEZA INICIAL
@@ -46,20 +51,34 @@ class Snake extends THREE.Object3D{
         this.add(cabeza);
 
         // Añadir cabeza a segmentosSnake y poner a TRUE que esta ocupada esa poisicion
-        this.segmentosSnake.push(cabeza);
-        this.matriz[this.conviertePosicionEnIndice(cabeza.position.x)][this.conviertePosicionEnIndice(cabeza.position.y)] = true;
+        this.segmentosSnake.push(cabeza); //Metemos la cabeza lo primero
+        this.matriz[this.conviertePosicionEnIndice(cabeza.position.x)][this.conviertePosicionEnIndice(cabeza.position.y)] = true; //Marcamos el segmento inicial como 
     }
 
+    // Destruir todos los meshes, geometrías y materiales de todos los segmentos de la serpiente
+    eliminarSerpiente(){
+
+        // Como veo que va a ser imposible borrar el objeto, lo mejor seria tener un metodo que sea como 
+        //inicializador, y asi poder reutilizar el objeto en vez de llamar al constructor
+
+        for (var i=0; i<this.segmentosSnake; i++){
+            this.segmentosSnake[i].geometry.dispose();
+            this.segmentosSnake[i].material.dispose();
+            geometry.dispose();
+        }
+    }
+
+    //Dada una posición con decimales, le eliminamos los decimales para convertirlo a entero y le restamos uno para ver su correspondencia en la matriz
     conviertePosicionEnIndice(posicion){
         return (Math.trunc(posicion)-1);
     }
 
-    crearMatriz(tamMatrizX, tamMatrizY){
-        //Tendremos una matriz con booleanos. True es que hay un segmento de la serpiente ocupando esa casilla y false si no
-        this.matriz = new Array(tamMatrizX);
+    //Crea una matriz de booleanos. Una celda vale True si hay un segmento de la serpiente ocupando esa casilla y false si no
+    crearMatriz(){
+        this.matriz = new Array(this.tamMatrizX);
 
         for(var i=0; i < this.matriz.length ; i++){
-            this.matriz[i] = new Array(tamMatrizY);
+            this.matriz[i] = new Array(this.tamMatrizY);
 
             for(var j = 0 ; j < this.matriz[i].length ; j++){
                 this.matriz[i][j] = false;
@@ -67,18 +86,18 @@ class Snake extends THREE.Object3D{
         }
     }
 
+    // Permite mover a la serpiente en la posición que le indique el parámetro dirección
     moverSerpiente() {
 
-        var cabeza = this.segmentosSnake[this.segmentosSnake.length-1];
+        var cabeza = this.segmentosSnake[0];
+        var cola = this.segmentosSnake[this.segmentosSnake.length-1];
 
-        console.log(cabeza.position.y);
+        //console.log(cabeza.position.y);
 
-        // Vamos de más a menos
+        // Vamos de la cola a la cabeza
         for(var i = this.segmentosSnake; i > 0 ; i--){
             // Mover los segmentos detras de la serpiente
         }
-
-        //NOTA
 
         if (this.direccion == Direcciones.DERECHA)
             cabeza.position.x += this.tamX;
@@ -118,8 +137,9 @@ class Snake extends THREE.Object3D{
     }
     
     cambiarDireccion(direccion_elegida){
+        //Permite cambiar la dirección a la que se dirige el snake
 
-        // Evitar que el jugador quiera moverse en la misma dirección en la que se está
+        // Evita que el jugador quiera moverse en la misma dirección en la que se está
         // moviendo pero en diferente sentido. Es decir si:
 
         // Se está moviendo hacia arriba y le da hacia abajo, no hacer nada
@@ -144,8 +164,17 @@ class Snake extends THREE.Object3D{
 
     }
 
-    comprobarChoqueMuro(){
-
+    //Comprueba si la posicion a la que va a ir la cabeza, es un muro. Si es muro, devuelve true
+    comprobarChoqueMuro(fila, columna){
+        if(fila < 0 || fila > this.tamMatrizX){
+            return true; //Hay choque horizontalmente
+        }
+        else if(columna < 0 || fila > this.tamMatrizY){
+            return true;
+        }
+        else{ 
+            false;
+        }
     }
 
     update () {

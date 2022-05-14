@@ -21,15 +21,6 @@ import { Snake } from './Snake.js'
  * Usaremos una clase derivada de la clase Scene de Three.js para llevar el control de la escena y de todo lo que ocurre en ella.
  */
 
-///////////////////////////////
-    // Enumerado para gestionar las direcciones del Snake
-  var Direcciones = {
-      ARRIBA: 0,
-      DERECHA: 1,
-      ABAJO: 2,
-      IZQUIERDA: 3
-}
-
  class MyScene extends THREE.Scene {
   // Recibe el  div  que se ha creado en el  html  que va a ser el lienzo en el que mostrar
   // la visualización de la escena
@@ -54,13 +45,18 @@ import { Snake } from './Snake.js'
     this.createGround ();
     
     /* Ejes de coordenadas. No los usaremos pero los dejo para referencias futuras
-    */
     this.axis = new THREE.AxesHelper (5);
     this.add (this.axis);
-    
+    */
 
-    this.snake = new Snake(this.tamTableroX, this.tamTableroY, this.numeroCasillasX, this.numeroCasillasY);
-    this.add(this.snake);
+    
+    this.inicioJuego = false;
+
+    this.setMessage("Pulsa R para iniciar el juego");
+
+    /*
+    //this.snake = new Snake(this.tamTableroX, this.tamTableroY, this.numeroCasillasX, this.numeroCasillasY);
+    //this.add(this.snake);
 
     //this.model = new Bomba();
     //this.model = new Naranja();
@@ -69,6 +65,12 @@ import { Snake } from './Snake.js'
     //this.model = new Pera();
     
     //this.add (this.model);
+    */
+  }
+
+  // Enseñar un mensaje por pantalla
+  setMessage (str) {
+    document.getElementById ("Messages").innerHTML = "<h2>"+str+"</h2>";
   }
   
   createCamera () {
@@ -222,36 +224,16 @@ import { Snake } from './Snake.js'
 
   // snakeMovement(script) -> setMovement (scene) -> changeDirection(snake) -> moverSerpiente
 
-  movimientoSnake (evento) {
-
-    var x = evento.which || evento.keyCode;
-    if(x == '38'){ // key up
-      scene.setMovement(3);
-    }
-    else if(x == '40'){ // key down
-      scene.setMovement(1);
-    }
-    else if(x == '37'){ // key left
-      scene.setMovement(2);
-    }
-    else if(x == '39'){ // key right
-      scene.setMovement(0);
-    }
-    else if(x == '82'){ // 'r' para reiniciar
-      if(scene.snake.gameOver){
-        scene = new MyScene (renderer.domElement);
-      }
-    }
-  }
-
   update () {
     // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
     this.renderer.render (this, this.getCamera());
 
     // Se actualiza la posición de la cámara según su controlador
     this.cameraControl.update(); //- Comentado no permite hacer zoom con rueda
-    
-    this.snake.update();
+
+    if(this.inicioJuego) //Si ha iniciado, haz el update del snake
+      this.snake.update();
+
     this.comprobarComerComida();
     
     // Este método debe ser llamado cada vez que queramos visualizar la escena de nuevo.
@@ -259,7 +241,48 @@ import { Snake } from './Snake.js'
     // Si no existiera esta línea,  update()  se ejecutaría solo la primera vez.
     requestAnimationFrame(() => this.update())
   }
- }
+
+  leerTeclado (evento) {
+    var x = evento.which || evento.keyCode; //Ver que tecla se pulsó
+
+    if(this.inicioJuego) //Si se ha iniciado el juego (y hay una snake), permitir que se pueda modificar la dirección del snake
+    {
+      if(x == '87'){ //Pulsar la W
+        console.log("Arriba");
+        this.snake.cambiarDireccion(Direcciones.ARRIBA);
+      }
+      else if(x == '83'){ //Pulsar la S
+        console.log("Abajo");
+        this.snake.cambiarDireccion(Direcciones.ABAJO);
+      }
+      else if(x == '65'){ //Pulsar la A
+        console.log("Izq");
+        this.snake.cambiarDireccion(Direcciones.IZQUIERDA);
+      }
+      else if(x == '68'){ // Pulsar la D
+        console.log("Dcha");
+        this.snake.cambiarDireccion(Direcciones.DERECHA);
+      }
+    }
+    
+    if(x == '82'){ // Pulsar la R. Permite iniciar y reiniciar el juego
+
+      if (this.inicioJuego){ //Si ya habia una serpiente antes, borrala
+        this.snake.eliminarSerpiente();
+        this.remove(this.snake); // Borrar de DOM
+
+        /////////////////////////////////////////////////////////////////// 
+        this.renderer.renderLists.dispose(); // PREGUNTAR SI ESTA BIEN Y SI ES NECESARI ESTA LIN    A  //Borrar de memoria
+        ///////////////////////////////////////////////////////////////////
+      }      
+
+      this.setMessage("");      
+      this.inicioJuego = true;
+      this.snake = new Snake(this.tamTableroX, this.tamTableroY, this.numeroCasillasX, this.numeroCasillasY);
+      this.add(this.snake);
+    }
+  }
+}
 
 /// La función   main
 $(function () {
@@ -269,10 +292,19 @@ $(function () {
 
   // Se añaden los listener de la aplicación. En este caso, el que va a comprobar cuándo se modifica el tamaño de la ventana de la aplicación.
   window.addEventListener ("resize", () => scene.onWindowResize());
-  window.addEventListener ("keydown", () => scene.movimientoSnake());
+  window.addEventListener ("keydown", (event) => scene.leerTeclado(event)); //Cuando se pulse la tecla, salta el listener
 
   // Que no se nos olvide, la primera visualización.
   scene.update();
 });
+
+///////////////////////////////
+// Enumerado para gestionar las direcciones del Snake
+var Direcciones = {
+    ARRIBA: 0,
+    DERECHA: 1,
+    ABAJO: 2,
+    IZQUIERDA: 3
+}
 
 export { Direcciones }
