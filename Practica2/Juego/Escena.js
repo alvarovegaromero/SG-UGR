@@ -41,6 +41,8 @@ import { Snake } from './Snake.js'
     this.createLights ();
     
     this.createCamera ();
+
+    this.createAudio ();
     
     this.createGround ();
     
@@ -71,6 +73,24 @@ import { Snake } from './Snake.js'
   // Enseñar un mensaje por pantalla
   setMessage (str) {
     document.getElementById ("Messages").innerHTML = "<h2>"+str+"</h2>";
+  }
+
+  createAudio(){
+    const listener = new THREE.AudioListener();
+    this.camera.add(listener);
+
+    const sound = new THREE.Audio(listener);
+
+    const audioLoader = new THREE.AudioLoader();
+    audioLoader.load('./Musica/CancionSnake.mp3',
+    function (buffer){
+      sound.setBuffer(buffer);
+      sound.setLoop(true);
+      sound.setVolume(0.5);
+      sound.play();
+    });
+
+
   }
   
   createCamera () {
