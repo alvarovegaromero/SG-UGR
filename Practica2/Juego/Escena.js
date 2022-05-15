@@ -33,7 +33,6 @@ import { Snake } from './Snake.js'
     this.numeroCasillasX = 16;
     this.numeroCasillasY = 16;
 
-
     this.renderer = this.createRenderer(myCanvas);
     
     this.gui = this.createGUI ();
@@ -50,11 +49,12 @@ import { Snake } from './Snake.js'
     this.axis = new THREE.AxesHelper (5);
     this.add (this.axis);
     */
-
     
     this.inicioJuego = false;
 
+    this.clearMessage();
     this.setMessage("Pulsa R para iniciar el juego");
+    this.setMessage("Creado por: David Correa y Álvaro Vega");
 
     /*
     //this.snake = new Snake(this.tamTableroX, this.tamTableroY, this.numeroCasillasX, this.numeroCasillasY);
@@ -71,26 +71,35 @@ import { Snake } from './Snake.js'
   }
 
   // Enseñar un mensaje por pantalla
+  clearMessage(){
+    document.getElementById ("Messages").innerHTML = "";
+  }
+
   setMessage (str) {
-    document.getElementById ("Messages").innerHTML = "<h2>"+str+"</h2>";
+    document.getElementById ("Messages").innerHTML += "<h2>"+str+"</h2>";
   }
 
   createAudio(){
     const listener = new THREE.AudioListener();
     this.camera.add(listener);
 
-    const sound = new THREE.Audio(listener);
+    var that = this;
+    this.sound = new THREE.Audio(listener);
 
     const audioLoader = new THREE.AudioLoader();
     audioLoader.load('./Musica/CancionSnake.mp3',
     function (buffer){
-      sound.setBuffer(buffer);
-      sound.setLoop(true);
-      sound.setVolume(0.5);
-      sound.play();
+      that.sound.setBuffer(buffer);
+      that.sound.setLoop(true);
+      that.sound.setVolume(0.5);
     });
+  }
 
-
+  cambiarMusica(){
+    if (this.sound.isPlaying)
+      this.sound.pause();
+    else
+      this.sound.play();
   }
   
   createCamera () {
@@ -234,9 +243,7 @@ import { Snake } from './Snake.js'
     this.renderer.setSize (window.innerWidth, window.innerHeight);
   }
 
-  establecerMovimiento(){
-    
-  }
+  
 
   comprobarComerComida(){
     
@@ -264,6 +271,9 @@ import { Snake } from './Snake.js'
 
   leerTeclado (evento) {
     var x = evento.which || evento.keyCode; //Ver que tecla se pulsó
+
+    if (x == '77')
+      this.cambiarMusica();
 
     if(this.inicioJuego) //Si se ha iniciado el juego (y hay una snake), permitir que se pueda modificar la dirección del snake
     {
@@ -296,7 +306,16 @@ import { Snake } from './Snake.js'
         ///////////////////////////////////////////////////////////////////
       }      
 
-      this.setMessage("");      
+      this.clearMessage();
+      this.setMessage("Las posibles frutas son:");
+      
+      this.setMessage("-Manzana: Aumentar tamaño");
+      this.setMessage("-Pera: Aumentar velocidad");
+
+      this.setMessage("-Uva: Reducir tamaño");
+      this.setMessage("-Naranja: Reducir velocidad");
+      this.setMessage("-Bomba: Game Over");
+      
       this.inicioJuego = true;
       this.snake = new Snake(this.tamTableroX, this.tamTableroY, this.numeroCasillasX, this.numeroCasillasY);
       this.add(this.snake);

@@ -18,15 +18,14 @@ class Snake extends THREE.Object3D{
 
         ///////////////////////////////
         // Control del inicio / fin del juego
-        this.finJuego = false; // Booleano para avisar si se ha perdido el juego
-        this.inicioJuego = true; // Esperamos que usuario de a un botón para jugar al juego
+        this.finPartida = false; // Booleano para avisar si se ha perdido el juego
         //OJO INICIO A TRUE PARA PRUEBAS
 
 
         ///////////////////////////////
         // Propiedades iniciales de la serpiente
         this.direccion = Direcciones.DERECHA; // Inicialmente, la serpiente empieza mirando a la derecha
-        this.velocidadSerpiente = 1; //Velocidad de la serpiente
+        this.velocidadSerpiente = 2.5; //Velocidad de la serpiente
         
         ///////////////////////////////
         //Crear estructuras para la gestion de la serpiente
@@ -48,7 +47,7 @@ class Snake extends THREE.Object3D{
         var cabeza = new THREE.Mesh(cabezaGeometria, cabezaMaterial);
 
         cabeza.position.set(dimensionesX/2-this.tamX/2, dimensionesY/2-this.tamY/2, 0); //Colocarlo abajo e izquierda del centro. Posicion inicial
-        
+   
         this.add(cabeza);
 
         // Añadir cabeza a segmentosSnake y poner a TRUE que esta ocupada esa poisicion
@@ -56,6 +55,14 @@ class Snake extends THREE.Object3D{
 
         //Marcamos la pos inicial como ocupada
         this.matriz[this.conviertePosicionEnIndice(cabeza.position.y)][this.conviertePosicionEnIndice(cabeza.position.x)] = true; 
+    }
+
+    clearMessage(){
+        document.getElementById ("Messages").innerHTML = "";
+    }
+
+    setMessage (str) {
+        document.getElementById ("Messages").innerHTML += "<h2>"+str+"</h2>";
     }
 
     // Destruir todos los meshes, geometrías y materiales de todos los segmentos de la serpiente
@@ -95,15 +102,6 @@ class Snake extends THREE.Object3D{
     getFilaCabeza(){
         return this.conviertePosicionEnIndice(this.segmentosSnake[0].position.y);
     }
-
-    
-    enseniaMatriz(){
-        for(var j = 0; j < this.tamMatrizX; j++){
-            if(this.matriz[7][j] === true)
-                console.log('1 -[',7,'][',j,'] ');
-        }
-    }
-    
     
     // Permite mover a la serpiente en la posición que le indique el parámetro dirección
     moverSerpiente() {
@@ -112,7 +110,9 @@ class Snake extends THREE.Object3D{
         var cola = this.segmentosSnake[this.segmentosSnake.length-1];
 
         //Poner la última casilla como no usada (se quedará vacia)
-        this.matriz[this.conviertePosicionEnIndice(cola.position.y)][this.conviertePosicionEnIndice(cola.position.x)] = false; 
+
+        if(!this.hecreadosegmento)
+            this.matriz[this.conviertePosicionEnIndice(cola.position.y)][this.conviertePosicionEnIndice(cola.position.x)] = false; 
 
         // Desplazar todas las casillas hacia la izquierda, haciendo que sigan la cabeza
         for(var i = this.segmentosSnake.length-1; i > 0; i--){
@@ -120,6 +120,7 @@ class Snake extends THREE.Object3D{
             this.segmentosSnake[i].position.y = this.segmentosSnake[i-1].position.y;
         }
 
+        //En función de la dirección, mover la cabeza hacia ese sitio.
         if (this.direccion == Direcciones.DERECHA) 
             cabeza.position.x += this.tamX;
 
@@ -132,25 +133,45 @@ class Snake extends THREE.Object3D{
         else if (this.direccion == Direcciones.ABAJO)
             cabeza.position.y -= this.tamY;
 
-        console.log(this.conviertePosicionEnIndice(cabeza.position.y)," ", this.conviertePosicionEnIndice(cabeza.position.x));
-
-        this.matriz[this.conviertePosicionEnIndice(cabeza.position.y)][this.conviertePosicionEnIndice(cabeza.position.x)] = true; 
-        this.enseniaMatriz();
-
-            /*
-        console.log(this.conviertePosicionEnIndice(cabeza.position.x)," - ", this.conviertePosicionEnIndice(cabeza.position.y));
-        console.log(this.matriz[this.conviertePosicionEnIndice(cabeza.position.x)][this.conviertePosicionEnIndice(cabeza.position.y)]);
-        console.log(this.matriz[this.conviertePosicionEnIndice(cabeza.position.x)+1][this.conviertePosicionEnIndice(cabeza.position.y)+1]);
-*/
-        //Marcar la nueva casilla como usada
     }
 
-    empezarJuego(){
-        this.inicioJuego = true;
+    //Una vez se ha movido la cabeza. Comprobar si todo ha ido bien, y si es así, marca la casilla de la cabeza como ocupada
+    procesarCasilla(){
+        if(this.comprobarChoqueMuro(this.getFilaCabeza(), this.getColumnaCabeza()))
+            this.perderJuego();
+        else if (this.comprobarCasillaOcupada(this.getFilaCabeza(), this.getColumnaCabeza()))
+            this.perderJuego();
+        else
+            this.matriz[this.getFilaCabeza()][this.getColumnaCabeza()] = true;   
     }
 
-    perderJuego(){
-        this.finJuego = true;
+    //Comprueba si la posicion a la que va a ir la cabeza, es un muro. Si es muro, devuelve true
+    comprobarChoqueMuro(fila, columna){
+        if((fila < 0) || (fila >= this.tamMatrizX)){
+            return true; //Hay choque horizontalmente
+        }
+        else if((columna < 0) || (columna >= this.tamMatrizY)){
+            return true;
+        }
+        else{ 
+            return false;
+        }
+    }
+
+    perderJuego(){ //Además, pieza asociada = bomba
+        this.finPartida = true;
+
+        this.clearMessage();
+        this.setMessage("¡HAS PERDIDO!");
+        this.setMessage("Pulsa R para reiniciar");
+    }
+
+    // Comprueba si una casilla de la matriz está ocupada. Si lo está, detectamos que ha habido un choque
+    comprobarCasillaOcupada(fila, columna){
+        if(!this.matriz[fila][columna])
+            return false;
+        else
+            return true;
     }
 
     // Incrementa el tamaño del snake.
@@ -159,14 +180,16 @@ class Snake extends THREE.Object3D{
 
         var geometria = new THREE.BoxGeometry(this.tamX, this.tamY, this.tamZ);
         var material = new THREE.MeshPhongMaterial({color: 0x0000FF});
-        var segmento = new THREE.Mesh(geometria, material);
-
+        var segmento = new THREE.Mesh(geometria, material); 
+        
         segmento.position.set(cola.position.x, cola.position.y, 0); //Colocarlo abajo e izquierda del centro. Posicion inicial
         
+        //Marcar como ocupado
+        this.matriz[this.conviertePosicionEnIndice(segmento.position.y)][this.conviertePosicionEnIndice(segmento.position.x)] = true;
+
         this.add(segmento);
 
-        //Marcar como ocupado
-        this.matriz[this.conviertePosicionEnIndice(segmento.position.y)][this.conviertePosicionEnIndice(segmento.position.x)] = true; 
+        this.hecreadosegmento = true;
 
         // Añadir cabeza a segmentosSnake y poner a TRUE que esta ocupada esa poisicion
         this.segmentosSnake.push(segmento); //Metemos la cabeza lo primero
@@ -174,15 +197,16 @@ class Snake extends THREE.Object3D{
 
     // Decrementa el tamaño del snake. En caso de ser muy pequeño, se pierde la partida
     decrementarTamanio() { // Fruta asociada = Uva
+        var cola = this.segmentosSnake[this.segmentosSnake.length-1];
         
-        // Evitar no decrementar demasiado la serpiente
-        var tam_segmentosSnake = this.segmentosSnake.length;
-        if (tam_segmentosSnake>1){
+        if (this.segmentosSnake.length>1){
+            
+            this.matriz[this.conviertePosicionEnIndice(cola.position.y)][this.conviertePosicionEnIndice(cola.position.x)] = false; 
             
             // Eliminar geometría, material y el propio objeto
-            this.segmentosSnake[tam_segmentosSnake-1].geometry.dispose();
-            this.segmentosSnake[tam_segmentosSnake-1].material.dispose();
-            this.remove(this.segmentosSnake[tam_segmentosSnake-1]);
+            cola.geometry.dispose();
+            cola.material.dispose();
+            this.remove(cola);
             this.segmentosSnake.pop();
         }
         else{ // Si la serpiente solo tiene la cabeza se acaba el juego
@@ -226,52 +250,65 @@ class Snake extends THREE.Object3D{
             this.direccion = direccion_elegida
     }
 
-    //Comprueba si la posicion a la que va a ir está ocupada por otra ficha del snake. Si está ocupada, devuelve true
-    comprobarChoqueSerpiente(){
+    /*
+    Comprueba si la posicion a la que va a ir está ocupada por otra segmento del snake. Si está ocupada, devuelve true
+    comprobarChoqueSerpiente(fila, columna){
+        
+        var choque = false;
+        for (var i = 1; i < this.segmentosSnake.length && !choque; i++){
+            
+            if ((fila===this.segmentosSnake[i].position.y) && (columna===this.segmentosSnake[i].position.x))
+                choque = true;
+        }
 
+        return choque;
     }
-
-    //Comprueba si la posicion a la que va a ir la cabeza, es un muro. Si es muro, devuelve true
-    comprobarChoqueMuro(fila, columna){
-        if((fila < 0) || (fila > this.tamMatrizX)){
-            return true; //Hay choque horizontalmente
-        }
-        else if((columna < 0) || (columna > this.tamMatrizY)){
-            return true;
-        }
-        else{ 
-            return false;
-        }
-    }
+    */
 
     update () {
 
-        if(this.inicioJuego && !this.finJuego){ //Si se ha iniciado el juego y no ha terminado
+        if(!this.finPartida){ //Si no se ha terminado la partida actual
             if(this.reloj.getElapsedTime()*this.velocidadSerpiente > this.contadorSegundos) 
             //Cada segundo (o más o menos en funcion de la velocidad), mueve la serpiente
             {
                 this.contadorSegundos += 1;
-                this.moverSerpiente();
-
-                
-                if(this.comprobarChoqueMuro( this.getFilaCabeza(),this.getColumnaCabeza() ))
-                    console.log("CHOQUEEEE");
             
                 if (this.contadorSegundos > 3 && this.contadorSegundos <= 4)
+                {
                     this.incrementarTamanio();
+                }
 
                 else if (this.contadorSegundos > 4 && this.contadorSegundos <= 5)
+                {
                     this.incrementarTamanio();
-
+                }
+      
                 else if (this.contadorSegundos > 5 && this.contadorSegundos <= 6)
-                    this.incrementarTamanio();    
-/*                        
-                else if (this.contadorSegundos > 6 && this.contadorSegundos <= 7)
+                {
                     this.incrementarTamanio();
-                
+                    
+                }
+
+                else if (this.contadorSegundos > 6 && this.contadorSegundos <= 7)
+                {
+                    this.incrementarTamanio();
+                }
+
                 else if (this.contadorSegundos > 7 && this.contadorSegundos <= 8)
-                    this.incrementarTamanio();   
-*/
+                {
+                    this.hecreadosegmento = false;
+                    //this.decrementarTamanio();
+                }
+/*
+                else if (this.contadorSegundos > 15 && this.contadorSegundos <= 16)
+                {
+                    this.decrementarTamanio();
+                }                
+                else if (this.contadorSegundos > 15 && this.contadorSegundos <= 16)
+                    this.decrementarTamanio();   */
+
+                this.moverSerpiente();
+                this.procesarCasilla();
             }
         }
     }
