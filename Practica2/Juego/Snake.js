@@ -1,5 +1,6 @@
 import * as THREE from '../libs/three.module.js'
 import {Direcciones} from './Escena.js'
+import {ValoresMatriz} from './Escena.js'
 
 class Snake extends THREE.Object3D{
     
@@ -25,7 +26,7 @@ class Snake extends THREE.Object3D{
         ///////////////////////////////
         // Propiedades iniciales de la serpiente
         this.direccion = Direcciones.DERECHA; // Inicialmente, la serpiente empieza mirando a la derecha
-        this.velocidadSerpiente = 2.5; //Velocidad de la serpiente
+        this.velocidadSerpiente = 1; //Velocidad de la serpiente
         
         ///////////////////////////////
         //Crear estructuras para la gestion de la serpiente
@@ -54,7 +55,7 @@ class Snake extends THREE.Object3D{
         this.segmentosSnake.push(cabeza); //Metemos la cabeza lo primero
 
         //Marcamos la pos inicial como ocupada
-        this.matriz[this.conviertePosicionEnIndice(cabeza.position.y)][this.conviertePosicionEnIndice(cabeza.position.x)] = true; 
+        this.matriz[this.conviertePosicionEnIndice(cabeza.position.y)][this.conviertePosicionEnIndice(cabeza.position.x)] = ValoresMatriz.SERPIENTE; 
     }
 
     clearMessage(){
@@ -88,7 +89,7 @@ class Snake extends THREE.Object3D{
             this.matriz[i] = new Array(this.tamMatrizX);
 
             for(var j = 0 ; j < this.tamMatrizX ; j++){
-                this.matriz[i][j] = false;
+                this.matriz[i][j] = ValoresMatriz.VACIO;
             }
         }
     }
@@ -112,7 +113,7 @@ class Snake extends THREE.Object3D{
         //Poner la última casilla como no usada (se quedará vacia)
 
         if(!this.hecreadosegmento)
-            this.matriz[this.conviertePosicionEnIndice(cola.position.y)][this.conviertePosicionEnIndice(cola.position.x)] = false; 
+            this.matriz[this.conviertePosicionEnIndice(cola.position.y)][this.conviertePosicionEnIndice(cola.position.x)] = ValoresMatriz.VACIO; 
 
         // Desplazar todas las casillas hacia la izquierda, haciendo que sigan la cabeza
         for(var i = this.segmentosSnake.length-1; i > 0; i--){
@@ -142,7 +143,7 @@ class Snake extends THREE.Object3D{
         else if (this.comprobarCasillaOcupada(this.getFilaCabeza(), this.getColumnaCabeza()))
             this.perderJuego();
         else
-            this.matriz[this.getFilaCabeza()][this.getColumnaCabeza()] = true;   
+            this.matriz[this.getFilaCabeza()][this.getColumnaCabeza()] = ValoresMatriz.SERPIENTE;   
     }
 
     //Comprueba si la posicion a la que va a ir la cabeza, es un muro. Si es muro, devuelve true
@@ -168,7 +169,7 @@ class Snake extends THREE.Object3D{
 
     // Comprueba si una casilla de la matriz está ocupada. Si lo está, detectamos que ha habido un choque
     comprobarCasillaOcupada(fila, columna){
-        if(!this.matriz[fila][columna])
+        if(this.matriz[fila][columna] === ValoresMatriz.VACIO)
             return false;
         else
             return true;
@@ -185,7 +186,7 @@ class Snake extends THREE.Object3D{
         segmento.position.set(cola.position.x, cola.position.y, 0); //Colocarlo abajo e izquierda del centro. Posicion inicial
         
         //Marcar como ocupado
-        this.matriz[this.conviertePosicionEnIndice(segmento.position.y)][this.conviertePosicionEnIndice(segmento.position.x)] = true;
+        this.matriz[this.conviertePosicionEnIndice(segmento.position.y)][this.conviertePosicionEnIndice(segmento.position.x)] = ValoresMatriz.SERPIENTE;
 
         this.add(segmento);
 
@@ -201,7 +202,7 @@ class Snake extends THREE.Object3D{
         
         if (this.segmentosSnake.length>1){
             
-            this.matriz[this.conviertePosicionEnIndice(cola.position.y)][this.conviertePosicionEnIndice(cola.position.x)] = false; 
+            this.matriz[this.conviertePosicionEnIndice(cola.position.y)][this.conviertePosicionEnIndice(cola.position.x)] = ValoresMatriz.VACIO; 
             
             // Eliminar geometría, material y el propio objeto
             cola.geometry.dispose();
@@ -216,14 +217,14 @@ class Snake extends THREE.Object3D{
 
     //Aumenta la velocidad del Snake
     aumentarVelocidad() { // Fruta asociada = Pera
-        if(this.velocidadSerpiente < 5) //Solo si es hay algo de velocidad, permitir reducirla
-            this.velocidadSerpiente += 0.5;
+        if(this.velocidadSerpiente < 2) //Solo si es hay algo de velocidad, permitir reducirla
+            this.velocidadSerpiente += 0.25;
     }
 
     //Reduce la velocidad del Snake
     reducirVelocidad() {  // Fruta asociada = Naranja
-        if(this.velocidadSerpiente > 0.5) //Solo si es hay algo de velocidad, permitir reducirla
-            this.velocidadSerpiente -= 0.5;
+        if(this.velocidadSerpiente > 0.25) //Solo si es hay algo de velocidad, permitir reducirla
+            this.velocidadSerpiente -= 25;
     }
     
     //Permite cambiar la dirección a la que se dirige el snake
@@ -269,9 +270,9 @@ class Snake extends THREE.Object3D{
 
         if(!this.finPartida){ //Si no se ha terminado la partida actual
             if(this.reloj.getElapsedTime()*this.velocidadSerpiente > this.contadorSegundos) 
-            //Cada segundo (o más o menos en funcion de la velocidad), mueve la serpiente
+            //Cada 0.1 segundos (o más o menos en funcion de la velocidad), mueve la serpiente
             {
-                this.contadorSegundos += 1;
+                this.contadorSegundos += 0.1;
             
                 if (this.contadorSegundos > 3 && this.contadorSegundos <= 4)
                 {

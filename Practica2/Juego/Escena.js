@@ -243,13 +243,9 @@ import { Snake } from './Snake.js'
     this.renderer.setSize (window.innerWidth, window.innerHeight);
   }
 
-  
-
   comprobarComerComida(){
     
   }
-
-  // snakeMovement(script) -> setMovement (scene) -> changeDirection(snake) -> moverSerpiente
 
   update () {
     // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
@@ -323,6 +319,16 @@ import { Snake } from './Snake.js'
   }
 }
 
+// Matriz de Snake con enteros
+// 0 - libre
+// 1 - serpentina
+// this.snake.metodo cambiar matriz y ahi la vaina
+// 2 - manzana
+// 3 - naranja
+// 4 - pera
+// 5 - uva
+// 6 - bomba
+
 /// La función   main
 $(function () {
   
@@ -346,4 +352,15 @@ var Direcciones = {
     IZQUIERDA: 3
 }
 
-export { Direcciones }
+// Representa el significado de un valor en la matriz del tablero.
+var ValoresMatriz = {
+  VACIO: 0,
+  SERPIENTE: 1,
+  MANZANA: 2,
+  NARANJA: 3,
+  PERA: 4,
+  UVA : 5,
+  BOMBA : 6
+}
+
+export { Direcciones, ValoresMatriz}
