@@ -254,7 +254,10 @@ import { Snake } from './Snake.js'
     this.cameraControl.update(); //- Comentado no permite hacer zoom con rueda
 
     if(this.inicioJuego) //Si ha iniciado, haz el update del snake
+    {
+      this.procesarComida();
       this.snake.update();
+    }
     
     // Este método debe ser llamado cada vez que queramos visualizar la escena de nuevo.
     // Literalmente le decimos al navegador: "La próxima vez que haya que refrescar la pantalla, llama al método que te indico".
@@ -271,19 +274,15 @@ import { Snake } from './Snake.js'
     if(this.inicioJuego) //Si se ha iniciado el juego (y hay una snake), permitir que se pueda modificar la dirección del snake
     {
       if(x == '87'){ //Pulsar la W
-        console.log("Arriba");
         this.snake.cambiarDireccion(Direcciones.ARRIBA);
       }
       else if(x == '83'){ //Pulsar la S
-        console.log("Abajo");
         this.snake.cambiarDireccion(Direcciones.ABAJO);
       }
       else if(x == '65'){ //Pulsar la A
-        console.log("Izq");
         this.snake.cambiarDireccion(Direcciones.IZQUIERDA);
       }
       else if(x == '68'){ // Pulsar la D
-        console.log("Dcha");
         this.snake.cambiarDireccion(Direcciones.DERECHA);
       }
     }
@@ -320,6 +319,57 @@ import { Snake } from './Snake.js'
     }
   }
 
+  procesarComida(){
+    var fila_cabeza = this.snake.getFilaCabeza();
+    var columna_cabeza = this.snake.getColumnaCabeza();
+
+    var casilla = this.snake.getCeldaMatriz(fila_cabeza, columna_cabeza);
+
+    if (casilla === ValoresMatriz.MANZANA){
+        this.snake.incrementarTamanio();
+        this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.VACIO);
+        this.manzana.destruirManzana();
+        this.remove(this.manzana);
+
+        var celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
+        this.crearManzana(celda.pos_y, celda.pos_x);
+    }
+    else if (casilla === ValoresMatriz.UVA){
+      this.snake.decrementarTamanio();
+      this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.VACIO);
+      this.uva.destruirUva();
+      this.remove(this.uva);
+
+      var celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
+      this.crearUva(celda.pos_y, celda.pos_x);
+    }
+    else if (casilla === ValoresMatriz.PERA){
+      this.snake.aumentarVelocidad();
+      this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.VACIO);
+      this.pera.destruirPera();
+      this.remove(this.pera);
+
+      var celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
+      this.crearPera(celda.pos_y, celda.pos_x);
+    }
+    else if (casilla === ValoresMatriz.NARANJA){
+      this.snake.reducirVelocidad();
+      console.log(this.snake.velocidadSerpiente);
+      this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.VACIO);
+      this.naranja.destruirNaranja();
+      this.remove(this.naranja);
+
+      var celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
+      this.crearNaranja(celda.pos_y, celda.pos_x);
+    }
+    else if (casilla === ValoresMatriz.BOMBA){
+      this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.VACIO);
+      this.snake.perderJuego();
+      this.bomba.destruirBomba();
+      this.remove(this.bomba);
+    }
+  }
+
   //Obtiene una celda vacia, dada un limite de x y limite de y
   obtenerCeldaRandomVacia(max1, max2){
     
@@ -334,6 +384,9 @@ import { Snake } from './Snake.js'
 
   // Crea todas las frutas en posiciones aleatorias
   crearFrutas(){
+
+    // NOTA IMPORTANTE: Recordamos que la y para nosotros son las filas y la x
+    // son las columnas, por eso invertimos los parámetros
     var celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
     this.crearManzana(celda.pos_y, celda.pos_x);
     
@@ -353,7 +406,6 @@ import { Snake } from './Snake.js'
   eliminarFrutas(){
       this.manzana.destruirManzana();
       this.remove(this.manzana);
-
       
       this.pera.destruirPera();
       this.remove(this.pera);
@@ -375,6 +427,7 @@ import { Snake } from './Snake.js'
     console.log(this.snake.getCeldaMatriz(fila, columna));
 
     this.manzana = new Manzana();
+    
     this.manzana.position.set(factor_conversion_mapa*columna, factor_conversion_mapa*fila, 0);
 
     this.add (this.manzana);

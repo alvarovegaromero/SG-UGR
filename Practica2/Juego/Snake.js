@@ -26,7 +26,7 @@ class Snake extends THREE.Object3D{
         ///////////////////////////////
         // Propiedades iniciales de la serpiente
         this.direccion = Direcciones.DERECHA; // Inicialmente, la serpiente empieza mirando a la derecha
-        this.velocidadSerpiente = 0.5; //Velocidad de la serpiente
+        this.velocidadSerpiente = 2.5; //Velocidad de la serpiente
         
         ///////////////////////////////
         //Crear estructuras para la gestion de la serpiente
@@ -145,10 +145,10 @@ class Snake extends THREE.Object3D{
 
         if(this.comprobarChoqueMuro(this.getFilaCabeza(), this.getColumnaCabeza()))
             this.perderJuego();
-        else if (this.comprobarCasillaOcupada(this.getFilaCabeza(), this.getColumnaCabeza()))
-            this.perderJuego();
         else if (this.getCeldaMatriz(this.getFilaCabeza(), this.getColumnaCabeza()) != ValoresMatriz.VACIO)
             console.log("MMMM QUE RICO");
+        else if (this.comprobarCasillaOcupada(this.getFilaCabeza(), this.getColumnaCabeza()))
+            this.perderJuego();
         else
             this.matriz[this.getFilaCabeza()][this.getColumnaCabeza()] = ValoresMatriz.SERPIENTE;   
     }
@@ -224,14 +224,14 @@ class Snake extends THREE.Object3D{
 
     //Aumenta la velocidad del Snake
     aumentarVelocidad() { // Fruta asociada = Pera
-        if(this.velocidadSerpiente < 2) //Solo si es hay algo de velocidad, permitir reducirla
-            this.velocidadSerpiente += 0.25;
+        if(this.velocidadSerpiente < 5) //Solo si es hay algo de velocidad, permitir reducirla
+            this.velocidadSerpiente += 1;
     }
 
     //Reduce la velocidad del Snake
     reducirVelocidad() {  // Fruta asociada = Naranja
-        if(this.velocidadSerpiente > 0.25) //Solo si es hay algo de velocidad, permitir reducirla
-            this.velocidadSerpiente -= 25;
+        if(this.velocidadSerpiente > 0.75) //Solo si es hay algo de velocidad, permitir reducirla
+            this.velocidadSerpiente -= 1;
     }
     
     //Permite cambiar la dirección a la que se dirige el snake
@@ -297,7 +297,7 @@ class Snake extends THREE.Object3D{
             if(this.reloj.getElapsedTime()*this.velocidadSerpiente > this.contadorSegundos) 
             //Cada 0.1 segundos (o más o menos en funcion de la velocidad), mueve la serpiente
             {
-                this.contadorSegundos += 0.1;
+                this.contadorSegundos += 0.5;
             
                 /*
                 if (this.contadorSegundos > 3 && this.contadorSegundos <= 4)
