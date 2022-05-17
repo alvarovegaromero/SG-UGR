@@ -6,17 +6,32 @@ class Manzana extends THREE.Object3D {
     super();
     
     // Se crea el pedunculo, pero no se añade a la escena, solamente se crea un mesh resultante de geometría y material
-    var pedunculo = new Pedunculo();
+    this.pedunculo = new Pedunculo();
 
-    pedunculo.meshPedunculo.position.y = 3.5;  // subir el rabo
-    this.add(pedunculo.meshPedunculo);
+    this.pedunculo.meshPedunculo.position.y = 3.5;  // subir el rabo
 
-    var manzana_sin_rabo = this.createManzana();
+    this.manzana_sin_rabo = this.createManzana();
 
-    var manzana = new THREE.Object3D();       // crear la manzana como el conjunto de la propia manzana y su rabo
-    manzana.add(manzana_sin_rabo, pedunculo);
+    this.manzana = new THREE.Object3D();       // crear la manzana como el conjunto de la propia manzana y su rabo
+    this.manzana.add(this.manzana_sin_rabo, this.pedunculo);
     
-    this.add (manzana);
+    this.manzana.scale.set(0.2, 0.2, 0.2);
+    this.manzana.rotateX(Math.PI/2);
+    this.manzana.position.set(0.95,0.95,0);
+
+    this.add (this.manzana);
+  }
+
+  destruirManzana(){
+    this.manzana_sin_rabo.geometry.dispose();
+    this.manzana_sin_rabo.material.dispose();
+
+    this.pedunculo.meshPedunculo.geometry.dispose();
+    this.pedunculo.meshPedunculo.material.dispose();
+
+    this.remove(this.manzana_sin_rabo);
+    this.remove(this.pedunculo);
+    this.remove(this.manzana);
   }
 
   createManzana()

@@ -26,6 +26,8 @@ class Pedunculo extends THREE.Object3D {
     geometry.scale(0.7, 0.7, 0.7);
 
     this.meshPedunculo = new THREE.Mesh(geometry, material);
+
+    this.add(this.meshPedunculo);
   }
 }
 

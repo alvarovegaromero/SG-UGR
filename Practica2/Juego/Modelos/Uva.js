@@ -5,9 +5,17 @@ class Uva extends THREE.Object3D {
   constructor(gui,titleGui) {
     super();
     
-    var uva = this.createUva(); //Uva realmente es un racimo de uvas
+    this.uva = this.createUva(); //Uva realmente es un racimo de uvas
+
+    this.uva_final = new THREE.Object3D();
+    this.uva_final.add(this.uva);
+
+    this.uva_final.scale.set(0.5, 0.5, 0.5);
+    this.uva_final.rotateX(Math.PI/2);
+    this.uva_final.position.set(0.92,0.92,0);
     
-    this.add (uva);
+
+    this.add (this.uva_final);
   }
 
   createUva()
@@ -31,6 +39,17 @@ class Uva extends THREE.Object3D {
     this.sphere.scale.y = 1.25;
     this.sphere.scale.set(0.5, 0.7, 0.5);
     this.sphere.position.y = 1;
+
+    return this.sphere;
+  }
+
+  destruirUva(){
+    this.uva.geometry.dispose();
+    this.uva.material.dispose();
+
+    this.remove(this.uva);
+    this.remove(this.uva_final);
+    this.remove(this.uva);
   }
   
   

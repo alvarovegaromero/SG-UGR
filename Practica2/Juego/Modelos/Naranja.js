@@ -5,16 +5,32 @@ class Naranja extends THREE.Object3D {
   constructor(gui,titleGui) {
     super();
     
-    var pedunculoNaranja = new PedunculoNaranja();
-    pedunculoNaranja.scale.set(0.5,0.5,0.5)
-    pedunculoNaranja.position.y += 3;
+    this.pedunculoNaranja = new PedunculoNaranja();
+    this.pedunculoNaranja.scale.set(0.5,0.5,0.5)
+    this.pedunculoNaranja.position.y += 3;
 
-    var naranja = this.createNaranja();
+    this.naranja = this.createNaranja();
     
-    var naranjaEntera = new THREE.Object3D();       // crear la manzana como el conjunto de la propia manzana y su rabo
-    naranjaEntera.add(pedunculoNaranja, naranja);
+    this.naranjaEntera = new THREE.Object3D();       // crear la manzana como el conjunto de la propia manzana y su rabo
+    this.naranjaEntera.add(this.pedunculoNaranja, this.naranja);
+
+    this.naranjaEntera.scale.set(0.3, 0.3, 0.3);
+    this.naranjaEntera.rotateX(Math.PI/2);
+    this.naranjaEntera.position.set(0.9,0.9,0);
     
-    this.add (naranjaEntera);
+    this.add (this.naranjaEntera);
+  }
+
+  destruirNaranja(){
+    this.naranja.geometry.dispose();
+    this.naranja.material.dispose();
+
+    this.pedunculoNaranja.rabo.geometry.dispose();
+    this.pedunculoNaranja.rabo.material.dispose();
+
+    this.remove(this.naranja);
+    this.remove(this.pedunculoNaranja);
+    this.remove(this.naranjaEntera);
   }
 
   createNaranja()

@@ -26,7 +26,7 @@ class Snake extends THREE.Object3D{
         ///////////////////////////////
         // Propiedades iniciales de la serpiente
         this.direccion = Direcciones.DERECHA; // Inicialmente, la serpiente empieza mirando a la derecha
-        this.velocidadSerpiente = 1; //Velocidad de la serpiente
+        this.velocidadSerpiente = 0.5; //Velocidad de la serpiente
         
         ///////////////////////////////
         //Crear estructuras para la gestion de la serpiente
@@ -74,6 +74,8 @@ class Snake extends THREE.Object3D{
             this.segmentosSnake[i].material.dispose();
         }
     }
+
+    
 
     //Dada una posición con decimales, le eliminamos los decimales para convertirlo a entero y le restamos uno para ver su correspondencia en la matriz
     conviertePosicionEnIndice(posicion){
@@ -138,10 +140,15 @@ class Snake extends THREE.Object3D{
 
     //Una vez se ha movido la cabeza. Comprobar si todo ha ido bien, y si es así, marca la casilla de la cabeza como ocupada
     procesarCasilla(){
+        //console.log(this.matriz[this.getFilaCabeza()][this.getColumnaCabeza()]);
+        console.log(this.getFilaCabeza(),this.getColumnaCabeza());
+
         if(this.comprobarChoqueMuro(this.getFilaCabeza(), this.getColumnaCabeza()))
             this.perderJuego();
         else if (this.comprobarCasillaOcupada(this.getFilaCabeza(), this.getColumnaCabeza()))
             this.perderJuego();
+        else if (this.getCeldaMatriz(this.getFilaCabeza(), this.getColumnaCabeza()) != ValoresMatriz.VACIO)
+            console.log("MMMM QUE RICO");
         else
             this.matriz[this.getFilaCabeza()][this.getColumnaCabeza()] = ValoresMatriz.SERPIENTE;   
     }
@@ -253,18 +260,36 @@ class Snake extends THREE.Object3D{
 
     /*
     Comprueba si la posicion a la que va a ir está ocupada por otra segmento del snake. Si está ocupada, devuelve true
-    comprobarChoqueSerpiente(fila, columna){
-        
+    comprobarChoqueSerpiente(fila, columna){   
         var choque = false;
-        for (var i = 1; i < this.segmentosSnake.length && !choque; i++){
-            
+        for (var i = 1; i < this.segmentosSnake.length && !choque; i++){           
             if ((fila===this.segmentosSnake[i].position.y) && (columna===this.segmentosSnake[i].position.x))
                 choque = true;
         }
-
         return choque;
     }
     */
+
+    setCeldaMatriz(fila, columna, valor){
+        this.matriz[fila][columna] = valor;
+    }
+
+    getCeldaMatriz(fila, columna){
+        return this.matriz[fila][columna];
+    }
+
+    comprobarComerComida(){
+        // Obtener posición de la cabeza
+        // Comprobar si en dicha posición, en la matriz, se encuentra una fruta
+        // - Si hay fruta, eliminarla de la matriz y ejecutar la función correspondiente
+
+        var pos_x = this.getFilaCabeza();
+        var pos_y = this.getColumnaCabeza();
+
+        if (this.getCeldaMatriz(pos_x, pos_y) != (ValoresMatriz.VACIO && ValoresMatriz.SERPIENTE))
+            console.log("MMMM QUE RICO");
+    }
+
 
     update () {
 
@@ -274,6 +299,7 @@ class Snake extends THREE.Object3D{
             {
                 this.contadorSegundos += 0.1;
             
+                /*
                 if (this.contadorSegundos > 3 && this.contadorSegundos <= 4)
                 {
                     this.incrementarTamanio();
@@ -300,7 +326,7 @@ class Snake extends THREE.Object3D{
                     this.hecreadosegmento = false;
                     //this.decrementarTamanio();
                 }
-/*
+                
                 else if (this.contadorSegundos > 15 && this.contadorSegundos <= 16)
                 {
                     this.decrementarTamanio();

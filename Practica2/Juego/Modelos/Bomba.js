@@ -7,16 +7,20 @@ class Bomba extends THREE.Object3D {
     
     var color = new THREE.Color(0xFFFFFF);
     // Se crea el pedunculo, pero no se añade a la escena, solamente se crea un mesh resultante de geometría y material
-    var pedunculo = new Pedunculo(color);
-    pedunculo.meshPedunculo.scale.set(0.75,1,0.75);
-    pedunculo.meshPedunculo.position.y = 2.5;  // subir el rabo
+    this.pedunculo = new Pedunculo(color);
+    this.pedunculo.meshPedunculo.scale.set(0.75,1,0.75);
+    this.pedunculo.meshPedunculo.position.y = 2.5;  // subir el rabo
 
-    var bomba = this.createBomba();
+    this.bomba = this.createBomba();
 
-    var bombaEntera = new THREE.Object3D();       // crear la manzana como el conjunto de la propia manzana y su rabo
-    bombaEntera.add(bomba, pedunculo.meshPedunculo);
+    this.bombaEntera = new THREE.Object3D();       // crear la manzana como el conjunto de la propia manzana y su rabo
+    this.bombaEntera.add(this.bomba, this.pedunculo.meshPedunculo);
     
-    this.add (bombaEntera);
+    this.bombaEntera.scale.set(0.3, 0.3, 0.3);
+    this.bombaEntera.rotateX(Math.PI/2);
+    this.bombaEntera.position.set(0.94,0.94,0);
+
+    this.add (this.bombaEntera);
   }
 
   createBomba()
@@ -50,6 +54,18 @@ class Bomba extends THREE.Object3D {
     bomba.position.y += 1.5;
 
     return bomba;
+  }
+
+  destruirBomba(){
+    this.bomba.geometry.dispose();
+    this.bomba.material.dispose();
+
+    this.pedunculo.meshPedunculo.geometry.dispose();
+    this.pedunculo.meshPedunculo.material.dispose();
+
+    this.remove(this.bomba);
+    this.remove(this.pedunculo);
+    this.remove(this.bombaEntera);
   }
   
   

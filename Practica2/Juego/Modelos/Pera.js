@@ -6,18 +6,21 @@ class Pera extends THREE.Object3D {
     super();
     
     // Se crea el pedunculo, pero no se añade a la escena, solamente se crea un mesh resultante de geometría y material
-    var pedunculo = new Pedunculo();
+    this.pedunculo = new Pedunculo();
 
-    pedunculo.meshPedunculo.position.y = 4.5;  // subir el rabo
-    pedunculo.meshPedunculo.scale.set(0.6,0.5,0.6);
-    this.add(pedunculo.meshPedunculo);
+    this.pedunculo.meshPedunculo.position.y = 4.5;  // subir el rabo
+    this.pedunculo.meshPedunculo.scale.set(0.6,0.5,0.6);
 
-    var pera_sin_rabo = this.createPera();
+    this.pera_sin_rabo = this.createPera();
 
-    var pera = new THREE.Object3D();       // crear la pera como el conjunto de la propia pera y su rabo
-    pera.add(pera_sin_rabo, pedunculo);
+    this.pera = new THREE.Object3D();       // crear la pera como el conjunto de la propia pera y su rabo
+    this.pera.add(this.pera_sin_rabo, this.pedunculo);
+
+    this.pera.scale.set(0.2, 0.2, 0.2);
+    this.pera.rotateX(Math.PI/2);
+    this.pera.position.set(0.92,0.94,0);
     
-    this.add (pera);
+    this.add (this.pera);
   }
 
   createPera()
@@ -42,6 +45,18 @@ class Pera extends THREE.Object3D {
     meshPera.position.y -= 0.25;
 
     return meshPera;
+  }
+
+  destruirPera(){
+    this.pera_sin_rabo.geometry.dispose();
+    this.pera_sin_rabo.material.dispose();
+
+    this.pedunculo.meshPedunculo.geometry.dispose();
+    this.pedunculo.meshPedunculo.material.dispose();
+
+    this.remove(this.pera_sin_rabo);
+    this.remove(this.pedunculo);
+    this.remove(this.pera);
   }
   
   

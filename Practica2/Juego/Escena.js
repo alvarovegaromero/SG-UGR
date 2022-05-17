@@ -21,6 +21,8 @@ import { Snake } from './Snake.js'
  * Usaremos una clase derivada de la clase Scene de Three.js para llevar el control de la escena y de todo lo que ocurre en ella.
  */
 
+  const factor_conversion_mapa = 1.0125;
+
  class MyScene extends THREE.Scene {
   // Recibe el  div  que se ha creado en el  html  que va a ser el lienzo en el que mostrar
   // la visualización de la escena
@@ -109,9 +111,13 @@ import { Snake } from './Snake.js'
     //   Los planos de recorte cercano y lejano
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
     // También se indica dónde se coloca
-    this.camera.position.set (this.tamTableroX/2, this.tamTableroY/2, 22.5); //Colocarlo en el eje y para ver el mapa desde arriba
+    //this.camera.position.set (this.tamTableroX/2, this.tamTableroY/2, 22.5); //Colocarlo en el eje y para ver el mapa desde arriba
+    this.camera.position.set (8, 8, 22.5); //Colocarlo en el eje y para ver el mapa desde arriba
+
     // Y hacia dónde mira
-    var look = new THREE.Vector3 (this.tamTableroX/2,this.tamTableroY/2,0);
+    //var look = new THREE.Vector3 (this.tamTableroX/2,this.tamTableroY/2,0);
+    var look = new THREE.Vector3 (8,8,0);
+
     this.camera.lookAt(look);
     this.add (this.camera);
     
@@ -128,10 +134,7 @@ import { Snake } from './Snake.js'
     this.cameraControl.target = look;
     
   }
-  
-  //
-  // crear mapa ¿alguna cosa mas?
-  //
+
   createGround () {
     // El suelo es un Mesh, necesita una geometría y un material.
     
@@ -243,10 +246,6 @@ import { Snake } from './Snake.js'
     this.renderer.setSize (window.innerWidth, window.innerHeight);
   }
 
-  comprobarComerComida(){
-    
-  }
-
   update () {
     // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
     this.renderer.render (this, this.getCamera());
@@ -256,8 +255,6 @@ import { Snake } from './Snake.js'
 
     if(this.inicioJuego) //Si ha iniciado, haz el update del snake
       this.snake.update();
-
-    this.comprobarComerComida();
     
     // Este método debe ser llamado cada vez que queramos visualizar la escena de nuevo.
     // Literalmente le decimos al navegador: "La próxima vez que haya que refrescar la pantalla, llama al método que te indico".
@@ -293,9 +290,11 @@ import { Snake } from './Snake.js'
     
     if(x == '82'){ // Pulsar la R. Permite iniciar y reiniciar el juego
 
-      if (this.inicioJuego){ //Si ya habia una serpiente antes, borrala
+      if (this.inicioJuego){ //Si ya habia una partida antes, borrala las cosas que habia
         this.snake.eliminarSerpiente();
         this.remove(this.snake); // Borrar de DOM
+
+        this.eliminarFrutas(); //Eliminar material y geometría de las frutas
 
         /////////////////////////////////////////////////////////////////// 
         this.renderer.renderLists.dispose(); // PREGUNTAR SI ESTA BIEN Y SI ES NECESARI ESTA LIN    A  //Borrar de memoria
@@ -314,8 +313,108 @@ import { Snake } from './Snake.js'
       
       this.inicioJuego = true;
       this.snake = new Snake(this.tamTableroX, this.tamTableroY, this.numeroCasillasX, this.numeroCasillasY);
+
+      this.crearFrutas();
+      
       this.add(this.snake);
     }
+  }
+
+  //Obtiene una celda vacia, dada un limite de x y limite de y
+  obtenerCeldaRandomVacia(max1, max2){
+    
+    do {
+      var pos_x = Math.floor(Math.random() * max1);
+      var pos_y = Math.floor(Math.random() * max2);
+    } while (this.snake.getCeldaMatriz(pos_y, pos_x) != ValoresMatriz.VACIO); // obtener casilla aleatoria que no esté ocupada 
+
+
+    return {pos_x, pos_y}; // floor devuelve entero
+  }
+
+  // Crea todas las frutas en posiciones aleatorias
+  crearFrutas(){
+    var celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
+    this.crearManzana(celda.pos_y, celda.pos_x);
+    
+    celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
+    this.crearPera(celda.pos_y, celda.pos_x);
+
+    celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
+    this.crearUva(celda.pos_y, celda.pos_x);
+
+    celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
+    this.crearNaranja(celda.pos_y, celda.pos_x);
+
+    celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
+    this.crearBomba(celda.pos_y, celda.pos_x);
+  }
+  
+  eliminarFrutas(){
+      this.manzana.destruirManzana();
+      this.remove(this.manzana);
+
+      
+      this.pera.destruirPera();
+      this.remove(this.pera);
+
+      this.uva.destruirUva();
+      this.remove(this.uva);
+
+      this.naranja.destruirNaranja();
+      this.remove(this.naranja);
+
+      this.bomba.destruirBomba();
+      this.remove(this.bomba);
+  }
+
+  crearManzana(fila, columna){
+    // Reflejar en la matriz que se ha añadido la fruta
+    console.log(fila,columna);
+    this.snake.setCeldaMatriz(fila, columna, ValoresMatriz.MANZANA);
+    console.log(this.snake.getCeldaMatriz(fila, columna));
+
+    this.manzana = new Manzana();
+    this.manzana.position.set(factor_conversion_mapa*columna, factor_conversion_mapa*fila, 0);
+
+    this.add (this.manzana);
+  }
+
+  crearUva(fila, columna){
+    this.snake.setCeldaMatriz(fila, columna, ValoresMatriz.UVA);
+
+    this.uva = new Uva();
+    this.uva.position.set(factor_conversion_mapa*columna, factor_conversion_mapa*fila, 0);
+
+    this.add (this.uva);
+  }
+
+  crearPera(fila, columna){
+    this.snake.setCeldaMatriz(fila, columna, ValoresMatriz.PERA);
+
+    this.pera = new Pera();
+    this.pera.position.set(factor_conversion_mapa*columna, factor_conversion_mapa*fila, 0);
+
+    this.add(this.pera);
+  }
+
+  crearBomba(fila, columna){
+    this.snake.setCeldaMatriz(fila, columna, ValoresMatriz.BOMBA);
+
+    this.bomba = new Bomba();
+    this.bomba.position.set(factor_conversion_mapa*columna, factor_conversion_mapa*fila, 0);
+
+    this.add(this.bomba);
+  }
+
+  crearNaranja(fila, columna){
+    this.snake.setCeldaMatriz(fila, columna, ValoresMatriz.NARANJA);
+
+    this.naranja = new Naranja();
+    this.naranja.position.set(factor_conversion_mapa*columna, factor_conversion_mapa*fila, 0);
+
+
+    this.add (this.naranja);
   }
 }
 
