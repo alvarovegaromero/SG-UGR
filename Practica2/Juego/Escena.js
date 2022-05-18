@@ -14,14 +14,9 @@ import { Pera } from './Modelos/Pera.js'
 import { Bomba } from './Modelos/Bomba.js'
 import { Snake } from './Snake.js'
 
-//import { PedunculoNaranja } from './Modelos/pedunculoNaranja.js' - Hacemos import en naranja
 
-/// La clase fachada del modelo
-/**
- * Usaremos una clase derivada de la clase Scene de Three.js para llevar el control de la escena y de todo lo que ocurre en ella.
- */
-
-  const factor_conversion_mapa = 1.0125;
+//El tablero no es perfecto, cada casilla mide 1.0125. Por eso, necesitamos convertir un valor de la matriz a la posicion real con este factor
+const factor_conversion_mapa = 1.0125;
 
  class MyScene extends THREE.Scene {
   // Recibe el  div  que se ha creado en el  html  que va a ser el lienzo en el que mostrar
@@ -57,19 +52,6 @@ import { Snake } from './Snake.js'
     this.clearMessage();
     this.setMessage("Pulsa R para iniciar el juego");
     this.setMessage("Creado por: David Correa y Álvaro Vega");
-
-    /*
-    //this.snake = new Snake(this.tamTableroX, this.tamTableroY, this.numeroCasillasX, this.numeroCasillasY);
-    //this.add(this.snake);
-
-    //this.model = new Bomba();
-    //this.model = new Naranja();
-    //this.model = new Uva();
-    //this.model = new Manzana();
-    //this.model = new Pera();
-    
-    //this.add (this.model);
-    */
   }
 
   // Enseñar un mensaje por pantalla
@@ -246,29 +228,11 @@ import { Snake } from './Snake.js'
     this.renderer.setSize (window.innerWidth, window.innerHeight);
   }
 
-  update () {
-    // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
-    this.renderer.render (this, this.getCamera());
-
-    // Se actualiza la posición de la cámara según su controlador
-    this.cameraControl.update(); //- Comentado no permite hacer zoom con rueda
-
-    if(this.inicioJuego) //Si ha iniciado, haz el update del snake
-    {
-      this.procesarComida();
-      this.snake.update();
-    }
-    
-    // Este método debe ser llamado cada vez que queramos visualizar la escena de nuevo.
-    // Literalmente le decimos al navegador: "La próxima vez que haya que refrescar la pantalla, llama al método que te indico".
-    // Si no existiera esta línea,  update()  se ejecutaría solo la primera vez.
-    requestAnimationFrame(() => this.update())
-  }
-
+  //Leemos que tecla se ha pulsado, y hacemos la acción asociada a esa tecla (mover snake, reiniciar, activar musica...)
   leerTeclado (evento) {
     var x = evento.which || evento.keyCode; //Ver que tecla se pulsó
 
-    if (x == '77')
+    if (x == '77') //Si pulsamos la m, activamos/desactivamos la musica
       this.cambiarMusica();
 
     if(this.inicioJuego) //Si se ha iniciado el juego (y hay una snake), permitir que se pueda modificar la dirección del snake
@@ -319,58 +283,59 @@ import { Snake } from './Snake.js'
     }
   }
 
+  //Si la cabeza del snake esta en una fruta, procesa su acción. Además borra la fruta actual, y crea otra en una posicion random
   procesarComida(){
     var fila_cabeza = this.snake.getFilaCabeza();
     var columna_cabeza = this.snake.getColumnaCabeza();
 
     var casilla = this.snake.getCeldaMatriz(fila_cabeza, columna_cabeza);
+    var celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);;
 
     if (casilla === ValoresMatriz.MANZANA){
         this.snake.incrementarTamanio();
-        this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.VACIO);
+        this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.SERPIENTE); //Las serpiente se comio la fruta
         this.manzana.destruirManzana();
         this.remove(this.manzana);
 
-        var celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
         this.crearManzana(celda.pos_y, celda.pos_x);
     }
+
     else if (casilla === ValoresMatriz.UVA){
       this.snake.decrementarTamanio();
-      this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.VACIO);
+      this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.SERPIENTE);
       this.uva.destruirUva();
       this.remove(this.uva);
 
-      var celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
       this.crearUva(celda.pos_y, celda.pos_x);
     }
+
     else if (casilla === ValoresMatriz.PERA){
       this.snake.aumentarVelocidad();
-      this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.VACIO);
+      this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.SERPIENTE);
       this.pera.destruirPera();
       this.remove(this.pera);
 
-      var celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
       this.crearPera(celda.pos_y, celda.pos_x);
     }
+
     else if (casilla === ValoresMatriz.NARANJA){
       this.snake.reducirVelocidad();
-      console.log(this.snake.velocidadSerpiente);
-      this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.VACIO);
+      this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.SERPIENTE);
       this.naranja.destruirNaranja();
       this.remove(this.naranja);
 
-      var celda = this.obtenerCeldaRandomVacia(this.numeroCasillasY, this.numeroCasillasX);
       this.crearNaranja(celda.pos_y, celda.pos_x);
     }
+
     else if (casilla === ValoresMatriz.BOMBA){
-      this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.VACIO);
+      this.snake.setCeldaMatriz(fila_cabeza, columna_cabeza, ValoresMatriz.SERPIENTE);
       this.snake.perderJuego();
       this.bomba.destruirBomba();
       this.remove(this.bomba);
     }
   }
 
-  //Obtiene una celda vacia, dada un limite de x y limite de y
+  //Obtiene una celda random vacia, dado un limite de x y limite de y
   obtenerCeldaRandomVacia(max1, max2){
     
     do {
@@ -378,11 +343,10 @@ import { Snake } from './Snake.js'
       var pos_y = Math.floor(Math.random() * max2);
     } while (this.snake.getCeldaMatriz(pos_y, pos_x) != ValoresMatriz.VACIO); // obtener casilla aleatoria que no esté ocupada 
 
-
     return {pos_x, pos_y}; // floor devuelve entero
   }
 
-  // Crea todas las frutas en posiciones aleatorias
+  // Crea todas las frutas en posiciones aleatorias que no estén previamente ocupadas
   crearFrutas(){
 
     // NOTA IMPORTANTE: Recordamos que la y para nosotros son las filas y la x
@@ -403,6 +367,7 @@ import { Snake } from './Snake.js'
     this.crearBomba(celda.pos_y, celda.pos_x);
   }
   
+  //Elimina todas las frutas que hay en la escena. "Borrado en cascada"
   eliminarFrutas(){
       this.manzana.destruirManzana();
       this.remove(this.manzana);
@@ -420,11 +385,10 @@ import { Snake } from './Snake.js'
       this.remove(this.bomba);
   }
 
+  //Creamos en la posición real, dada una fila y columna de la matriz determinada, la manzana. También marcamos en la matriz que hay una manzana
   crearManzana(fila, columna){
     // Reflejar en la matriz que se ha añadido la fruta
-    console.log(fila,columna);
     this.snake.setCeldaMatriz(fila, columna, ValoresMatriz.MANZANA);
-    console.log(this.snake.getCeldaMatriz(fila, columna));
 
     this.manzana = new Manzana();
     
@@ -433,6 +397,7 @@ import { Snake } from './Snake.js'
     this.add (this.manzana);
   }
 
+  //Creamos en la posición real, dada una fila y columna de la matriz determinada, la uva. También marcamos en la matriz que hay una uva
   crearUva(fila, columna){
     this.snake.setCeldaMatriz(fila, columna, ValoresMatriz.UVA);
 
@@ -442,6 +407,7 @@ import { Snake } from './Snake.js'
     this.add (this.uva);
   }
 
+  //Creamos en la posición real, dada una fila y columna de la matriz determinada, la pera. También marcamos en la matriz que hay una pera
   crearPera(fila, columna){
     this.snake.setCeldaMatriz(fila, columna, ValoresMatriz.PERA);
 
@@ -451,6 +417,7 @@ import { Snake } from './Snake.js'
     this.add(this.pera);
   }
 
+  //Creamos en la posición real, dada una fila y columna de la matriz determinada, la bomba. También marcamos en la matriz que hay una bomba
   crearBomba(fila, columna){
     this.snake.setCeldaMatriz(fila, columna, ValoresMatriz.BOMBA);
 
@@ -460,14 +427,36 @@ import { Snake } from './Snake.js'
     this.add(this.bomba);
   }
 
+  //Creamos en la posición real, dada una fila y columna de la matriz determinada, la naranja. También marcamos en la matriz que hay una naranja
   crearNaranja(fila, columna){
     this.snake.setCeldaMatriz(fila, columna, ValoresMatriz.NARANJA);
 
     this.naranja = new Naranja();
     this.naranja.position.set(factor_conversion_mapa*columna, factor_conversion_mapa*fila, 0);
 
-
     this.add (this.naranja);
+  }
+
+  update () {
+    // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
+    this.renderer.render (this, this.getCamera());
+
+    // Se actualiza la posición de la cámara según su controlador
+    this.cameraControl.update(); //- Comentado no permite hacer zoom con rueda
+
+    if(this.inicioJuego) //Si ha iniciado, haz el update del snake
+    {
+      this.snake.update();
+
+      //Para evitar hacer get en una casilla fuera de índice y haya error por los indices
+      if(!this.snake.comprobarChoqueMuro(this.snake.getFilaCabeza(), this.snake.getColumnaCabeza())) 
+        this.procesarComida(); //Si hay comida en la casilla, la procesa
+    }
+    
+    // Este método debe ser llamado cada vez que queramos visualizar la escena de nuevo.
+    // Literalmente le decimos al navegador: "La próxima vez que haya que refrescar la pantalla, llama al método que te indico".
+    // Si no existiera esta línea,  update()  se ejecutaría solo la primera vez.
+    requestAnimationFrame(() => this.update())
   }
 }
 
