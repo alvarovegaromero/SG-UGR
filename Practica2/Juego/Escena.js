@@ -42,6 +42,7 @@ const factor_conversion_mapa = 1.0125;
     this.createCamera ();
 
     this.createAudio ();
+    this.createAudioGameOver();
     
     this.createGround ();
     
@@ -51,6 +52,7 @@ const factor_conversion_mapa = 1.0125;
     */
     
     this.inicioJuego = false;
+    this.reproducido = false; // controla si se ha reproducido el sonido de gameover
 
     this.clearMessage();
     this.setMessage("Pulsa R para iniciar el juego");
@@ -96,6 +98,26 @@ const factor_conversion_mapa = 1.0125;
       that.sound.setLoop(true);
       that.sound.setVolume(0.1);
     });
+  }
+
+  createAudioGameOver(){
+    const listener = new THREE.AudioListener();
+
+    var that = this;
+    this.gameover = new THREE.Audio(listener);
+
+    const audioLoader = new THREE.AudioLoader();
+    audioLoader.load('./Musica/gameover.mp3',
+    function (buffer){
+      that.gameover.setBuffer(buffer);
+      that.gameover.setLoop(false);
+      that.gameover.setVolume(0.1);
+    });
+  }
+
+  playGameOver(){
+      this.gameover.play();
+      this.reproducido = true;
   }
 
   cambiarMusica(){
@@ -285,9 +307,16 @@ const factor_conversion_mapa = 1.0125;
         this.pausa = !this.pausa;
 
         if (this.pausa)
+        {
+          if (!this.muted)
+            this.sound.pause();
           this.setPausa("PAUSA");
-        else 
+        }
+        else{
+          if (!this.muted)
+            this.sound.play();
           this.clearPausa();
+        }
       }
     }
     
@@ -306,6 +335,8 @@ const factor_conversion_mapa = 1.0125;
 
       if (!this.muted)
         this.reiniciarMusica();
+      
+      this.reproducido = false; // controla si se ha reproducido el sonido de gameover
 
       this.clearMessage();
       this.clearTeclas();
@@ -506,6 +537,17 @@ const factor_conversion_mapa = 1.0125;
         //Para evitar hacer get en una casilla fuera de índice y haya error por los indices
         if(!this.snake.comprobarChoqueMuro(this.snake.getFilaCabeza(), this.snake.getColumnaCabeza())) 
           this.procesarComida(); //Si hay comida en la casilla, la procesa
+        
+        if(this.snake.finPartida)
+        {
+          // Parar música del juego
+          if (this.sound.isPlaying)
+            this.sound.stop();
+
+          // Reproducir sonido del gameover solo una vez
+          if (!this.muted && !this.reproducido) // controla si se ha reproducido el sonido de gameover
+            this.playGameOver();
+        }
       }
     }
     
