@@ -32,6 +32,7 @@ class Snake extends THREE.Object3D{
     
         // IMPORTANTE, la y es la fila, x la columna
         this.crearMatriz();
+        this.createAudio();
 
         ///////////////////////////////
         // Para controlar el movimiento de la serpiente
@@ -56,6 +57,25 @@ class Snake extends THREE.Object3D{
         //Marcamos la pos inicial como ocupada
         this.matriz[this.conviertePosicionEnIndice(cabeza.position.y)][this.conviertePosicionEnIndice(cabeza.position.x)] = ValoresMatriz.SERPIENTE; 
     }
+
+    createAudio(){
+        const listener = new THREE.AudioListener();
+    
+        var that = this;
+        this.sound = new THREE.Audio(listener);
+    
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('./Musica/gameover.mp3',
+        function (buffer){
+          that.sound.setBuffer(buffer);
+          that.sound.setLoop(false);
+          that.sound.setVolume(0.1);
+        });
+      }
+    
+      playGameOver(){
+          this.sound.play();
+      }
 
     clearMessage(){
         document.getElementById ("Messages").innerHTML = "";
@@ -178,6 +198,7 @@ class Snake extends THREE.Object3D{
     perderJuego(){ //Además, pieza asociada = bomba
         this.finPartida = true;
 
+        this.playGameOver();
         this.clearMessage();
         this.setMessage("¡HAS PERDIDO!");
         this.setMessage("Pulsa R para reiniciar");

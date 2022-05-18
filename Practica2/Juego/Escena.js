@@ -30,6 +30,9 @@ const factor_conversion_mapa = 1.0125;
     this.numeroCasillasX = 16;
     this.numeroCasillasY = 16;
 
+    this.pausa = false;
+    this.muted = true;
+
     this.renderer = this.createRenderer(myCanvas);
     
     this.gui = this.createGUI ();
@@ -63,6 +66,22 @@ const factor_conversion_mapa = 1.0125;
     document.getElementById ("Messages").innerHTML += "<h2>"+str+"</h2>";
   }
 
+  clearTeclas(){
+    document.getElementById ("Teclas").innerHTML = "";
+  }
+
+  setTeclas (str) {
+    document.getElementById ("Teclas").innerHTML += "<h2>"+str+"</h2>";
+  }
+
+  setPausa (str) {
+    document.getElementById ("Pausa").innerHTML += "<h2>"+str+"</h2>";
+  }
+
+  clearPausa(){
+    document.getElementById ("Pausa").innerHTML = "";
+  }
+
   createAudio(){
     const listener = new THREE.AudioListener();
     this.camera.add(listener);
@@ -75,15 +94,27 @@ const factor_conversion_mapa = 1.0125;
     function (buffer){
       that.sound.setBuffer(buffer);
       that.sound.setLoop(true);
-      that.sound.setVolume(0.5);
+      that.sound.setVolume(0.1);
     });
   }
 
   cambiarMusica(){
     if (this.sound.isPlaying)
+    {
+      this.muted = true;
       this.sound.pause();
+    }
     else
+    {
+      this.muted = false;
       this.sound.play();
+    }
+  }
+
+  reiniciarMusica(){
+    if (this.sound.isPlaying)
+      this.sound.stop();
+    this.sound.play();
   }
   
   createCamera () {
@@ -249,6 +280,15 @@ const factor_conversion_mapa = 1.0125;
       else if(x == '68'){ // Pulsar la D
         this.snake.cambiarDireccion(Direcciones.DERECHA);
       }
+
+      else if(x == '80'){ // Pulsar la P: pausa
+        this.pausa = !this.pausa;
+
+        if (this.pausa)
+          this.setPausa("PAUSA");
+        else 
+          this.clearPausa();
+      }
     }
     
     if(x == '82'){ // Pulsar la R. Permite iniciar y reiniciar el juego
@@ -262,9 +302,13 @@ const factor_conversion_mapa = 1.0125;
         /////////////////////////////////////////////////////////////////// 
         this.renderer.renderLists.dispose(); // PREGUNTAR SI ESTA BIEN Y SI ES NECESARI ESTA LIN    A  //Borrar de memoria
         ///////////////////////////////////////////////////////////////////
-      }      
+      }
+
+      if (!this.muted)
+        this.reiniciarMusica();
 
       this.clearMessage();
+      this.clearTeclas();
       this.setMessage("Las posibles frutas son:");
       
       this.setMessage("-Manzana: Aumentar tamaño");
@@ -273,6 +317,15 @@ const factor_conversion_mapa = 1.0125;
       this.setMessage("-Uva: Reducir tamaño");
       this.setMessage("-Naranja: Reducir velocidad");
       this.setMessage("-Bomba: Game Over");
+
+      this.setTeclas("W: arriba");
+      this.setTeclas("A: izquierda");
+      this.setTeclas("S: abajo");
+      this.setTeclas("D: derecha");
+
+      this.setTeclas("P: pausa");
+      this.setTeclas("M: iniciar/pausar música");
+      this.setTeclas("R: reiniciar");
       
       this.inicioJuego = true;
       this.snake = new Snake(this.tamTableroX, this.tamTableroY, this.numeroCasillasX, this.numeroCasillasY);
@@ -446,11 +499,14 @@ const factor_conversion_mapa = 1.0125;
 
     if(this.inicioJuego) //Si ha iniciado, haz el update del snake
     {
-      this.snake.update();
+      if (!this.pausa)
+      {
+        this.snake.update();
 
-      //Para evitar hacer get en una casilla fuera de índice y haya error por los indices
-      if(!this.snake.comprobarChoqueMuro(this.snake.getFilaCabeza(), this.snake.getColumnaCabeza())) 
-        this.procesarComida(); //Si hay comida en la casilla, la procesa
+        //Para evitar hacer get en una casilla fuera de índice y haya error por los indices
+        if(!this.snake.comprobarChoqueMuro(this.snake.getFilaCabeza(), this.snake.getColumnaCabeza())) 
+          this.procesarComida(); //Si hay comida en la casilla, la procesa
+      }
     }
     
     // Este método debe ser llamado cada vez que queramos visualizar la escena de nuevo.
