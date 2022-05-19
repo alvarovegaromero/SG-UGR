@@ -14,6 +14,21 @@ import { Pera } from './Modelos/Pera.js'
 import { Bomba } from './Modelos/Bomba.js'
 import { Snake } from './Snake.js'
 
+/*
+Apartados:
+- Mensajes
+- Música
+- Funciones de la escena
+- Teclado
+- Comida
+*/
+
+/*
+- camara
+- dispose (eliminar serpiente y frutas)
+- textura
+ */
+
 
 //El tablero no es perfecto, cada casilla mide 1.0125. Por eso, necesitamos convertir un valor de la matriz a la posicion real con este factor
 const factor_conversion_mapa = 1.0125;
@@ -24,66 +39,81 @@ const factor_conversion_mapa = 1.0125;
   constructor (myCanvas) { 
     super();
 
+    //this.target = new THREE.Object3D();
+
+    // Incluye los bordes del tablero
     this.tamTableroX = 17;
     this.tamTableroY = 17;
     
+    // No incluye los bordes del tablero, se usan para la matriz
     this.numeroCasillasX = 16;
     this.numeroCasillasY = 16;
 
-    this.pausa = false;
-    this.muted = true;
+    this.pausa = false;         // Controla pausa
+    this.muted = true;          // Controla música silenciada
+    this.cambio_camara = false; // Controla cambio de la cámara
 
     this.renderer = this.createRenderer(myCanvas);
-    
     this.gui = this.createGUI ();
     
     this.createLights ();
-    
     this.createCamera ();
-
     this.createAudio ();
     this.createAudioGameOver();
-    
     this.createGround ();
     
-    /* Ejes de coordenadas. No los usaremos pero los dejo para referencias futuras
-    this.axis = new THREE.AxesHelper (5);
-    this.add (this.axis);
-    */
-    
     this.inicioJuego = false;
-    this.reproducido = false; // controla si se ha reproducido el sonido de gameover
+    this.reproducido = false; // Controla si se ha reproducido el sonido de gameover
 
     this.clearMessage();
     this.setMessage("Pulsa R para iniciar el juego");
     this.setMessage("Creado por: David Correa y Álvaro Vega");
   }
 
+  //////////////////////////////////////////////////
+  // MENSAJES
+  //////////////////////////////////////////////////
+
   // Enseñar un mensaje por pantalla
   clearMessage(){
     document.getElementById ("Messages").innerHTML = "";
   }
 
+  // Limpia apartado mensajes
   setMessage (str) {
     document.getElementById ("Messages").innerHTML += "<h2>"+str+"</h2>";
   }
 
+  // Limpia apartado de las teclas
   clearTeclas(){
     document.getElementById ("Teclas").innerHTML = "";
   }
 
+  // Escribe mensajes en el apartado de las teclas
   setTeclas (str) {
     document.getElementById ("Teclas").innerHTML += "<h2>"+str+"</h2>";
   }
 
+  // Escribe mensaje de pausa
   setPausa (str) {
     document.getElementById ("Pausa").innerHTML += "<h2>"+str+"</h2>";
   }
 
+  // Elimina mensaje de pausa
   clearPausa(){
     document.getElementById ("Pausa").innerHTML = "";
   }
 
+  //////////////////////////////////////////////////
+  // FIN MENSAJES
+  //////////////////////////////////////////////////
+
+
+  //////////////////////////////////////////////////
+  // MÚSICA
+  //////////////////////////////////////////////////
+
+  // Crea música de fondo del juego
   createAudio(){
     const listener = new THREE.AudioListener();
     this.camera.add(listener);
@@ -100,6 +130,7 @@ const factor_conversion_mapa = 1.0125;
     });
   }
 
+  // Crea sonido del gameover
   createAudioGameOver(){
     const listener = new THREE.AudioListener();
 
@@ -115,11 +146,13 @@ const factor_conversion_mapa = 1.0125;
     });
   }
 
+  // Reproduce sonido de gameover
   playGameOver(){
       this.gameover.play();
       this.reproducido = true;
   }
 
+  // Función para el mute
   cambiarMusica(){
     if (this.sound.isPlaying)
     {
@@ -133,23 +166,28 @@ const factor_conversion_mapa = 1.0125;
     }
   }
 
+  // Play/Stop de la música
   reiniciarMusica(){
     if (this.sound.isPlaying)
       this.sound.stop();
     this.sound.play();
   }
+
+  //////////////////////////////////////////////////
+  // FIN MÚSICA
+  //////////////////////////////////////////////////
+
+
+  //////////////////////////////////////////////////
+  // FUNCIONES DE LA ESCENA
+  //////////////////////////////////////////////////
   
   createCamera () {
-    // Para crear una cámara le indicamos
-    //   El ángulo del campo de visión vértical en grados sexagesimales
-    //   La razón de aspecto ancho/alto
-    //   Los planos de recorte cercano y lejano
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    // También se indica dónde se coloca
+    
     //this.camera.position.set (this.tamTableroX/2, this.tamTableroY/2, 22.5); //Colocarlo en el eje y para ver el mapa desde arriba
     this.camera.position.set (8, 8, 22.5); //Colocarlo en el eje y para ver el mapa desde arriba
 
-    // Y hacia dónde mira
     //var look = new THREE.Vector3 (this.tamTableroX/2,this.tamTableroY/2,0);
     var look = new THREE.Vector3 (8,8,0);
 
@@ -159,8 +197,6 @@ const factor_conversion_mapa = 1.0125;
     // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
     this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
     
-    /* Para poder mover la cam. Lo comento para quitarlo
-    Pero lo dejo por si tuvieramos que ver algo */
     // Se configuran las velocidades de los movimientos
     this.cameraControl.rotateSpeed = 5;
     this.cameraControl.zoomSpeed = -2;
@@ -171,27 +207,21 @@ const factor_conversion_mapa = 1.0125;
   }
 
   createGround () {
-    // El suelo es un Mesh, necesita una geometría y un material.
     
     // La geometría es una caja con muy poca altura
     var geometryGround = new THREE.BoxGeometry (this.tamTableroX,this.tamTableroY, 0.2); 
     
-    // El material se hará con una textura de madera
     var texture = new THREE.TextureLoader().load('./Imagenes/cesped3.0.jpg');
     var materialGround = new THREE.MeshPhongMaterial ({map: texture});
     
-    // Ya se puede construir el Mesh
     var ground = new THREE.Mesh (geometryGround, materialGround);
     
-    // Todas las figuras se crean centradas en el origen.
     // El suelo lo bajamos la mitad de su altura para que el origen del mundo se quede en su lado superior
     ground.position.z = -0.1;
 
     ground.position.x += this.tamTableroX/2;
     ground.position.y += this.tamTableroY/2;
 
-
-    // Que no se nos olvide añadirlo a la escena, que en este caso es  this
     this.add (ground);
   }
   
@@ -199,17 +229,13 @@ const factor_conversion_mapa = 1.0125;
     // Se crea la interfaz gráfica de usuario
     var gui = new GUI();
     
-    // La escena le va a añadir sus propios controles. 
-    // Se definen mediante una   new function()
-    // En este caso la intensidad de la luz y si se muestran o no los ejes
     this.guiControls = {
       // En el contexto de una función   this   alude a la función
       lightIntensity : 0.4,
     }
 
-    // Se crea una sección para los controles de esta clase
     var folder = gui.addFolder ('Luz ambiental');
-    
+  
     // Se le añade un control para la intensidad de la luz
     folder.add (this.guiControls, 'lightIntensity', 0, 1, 0.1)
       .name('Intensidad de la Luz : ')
@@ -219,18 +245,10 @@ const factor_conversion_mapa = 1.0125;
   }
   
   createLights () {
-    // Se crea una luz ambiental, evita que se vean complentamente negras las zonas donde no incide de manera directa una fuente de luz
-    // La luz ambiental solo tiene un color y una intensidad
-    // Se declara como   var   y va a ser una variable local a este método
-    //    se hace así puesto que no va a ser accedida desde otros métodos
+
     var ambientLight = new THREE.AmbientLight(0xccddee, 0.35);
-    // La añadimos a la escena
     this.add (ambientLight);
-    
-    // Se crea una luz focal que va a ser la luz principal de la escena
-    // La luz focal, además tiene una posición, y un punto de mira
-    // Si no se le da punto de mira, apuntará al (0,0,0) en coordenadas del mundo
-    // En este caso se declara como   this.atributo   para que sea un atributo accesible desde otros métodos.
+
     this.spotLight = new THREE.SpotLight( 0xffffff, this.guiControls.lightIntensity );
     this.spotLight.position.set( 0, 0, 60 ); //Desde la camara a abajo
     this.add (this.spotLight);
@@ -259,8 +277,6 @@ const factor_conversion_mapa = 1.0125;
   }
   
   getCamera () {
-    // En principio se devuelve la única cámara que tenemos
-    // Si hubiera varias cámaras, este método decidiría qué cámara devuelve cada vez que es consultado
     return this.camera;
   }
   
@@ -281,12 +297,18 @@ const factor_conversion_mapa = 1.0125;
     this.renderer.setSize (window.innerWidth, window.innerHeight);
   }
 
+  //////////////////////////////////////////////////
+  // FIN FUNCIONES DE LA ESCENA
+  //////////////////////////////////////////////////
+
+
+  //////////////////////////////////////////////////
+  // TECLADO
+  //////////////////////////////////////////////////
+
   //Leemos que tecla se ha pulsado, y hacemos la acción asociada a esa tecla (mover snake, reiniciar, activar musica...)
   leerTeclado (evento) {
     var x = evento.which || evento.keyCode; //Ver que tecla se pulsó
-
-    if (x == '77') //Si pulsamos la m, activamos/desactivamos la musica
-      this.cambiarMusica();
 
     if(this.inicioJuego) //Si se ha iniciado el juego (y hay una snake), permitir que se pueda modificar la dirección del snake
     {
@@ -303,6 +325,9 @@ const factor_conversion_mapa = 1.0125;
         this.snake.cambiarDireccion(Direcciones.DERECHA);
       }
 
+      else if (x == '77') // Pulsar la M: activamos/desactivamos la musica
+      this.cambiarMusica();
+
       else if(x == '80'){ // Pulsar la P: pausa
         this.pausa = !this.pausa;
 
@@ -318,18 +343,23 @@ const factor_conversion_mapa = 1.0125;
           this.clearPausa();
         }
       }
+
+      else if(x == '67'){ // Pulsar la C, cambio de cámara
+        this.cambio_camara = !this.cambio_camara;
+      }
     }
     
     if(x == '82'){ // Pulsar la R. Permite iniciar y reiniciar el juego
 
-      if (this.inicioJuego){ //Si ya habia una partida antes, borrala las cosas que habia
+      //Si ya habia una partida antes, borrar las cosas que habia
+      if (this.inicioJuego){ 
         this.snake.eliminarSerpiente();
         this.remove(this.snake); // Borrar de DOM
 
         this.eliminarFrutas(); //Eliminar material y geometría de las frutas
 
         /////////////////////////////////////////////////////////////////// 
-        this.renderer.renderLists.dispose(); // PREGUNTAR SI ESTA BIEN Y SI ES NECESARI ESTA LIN    A  //Borrar de memoria
+        this.renderer.renderLists.dispose(); // PREGUNTAR SI ESTA BIEN Y SI ES NECESARI ESTA LINEA  //Borrar de memoria
         ///////////////////////////////////////////////////////////////////
       }
 
@@ -354,6 +384,7 @@ const factor_conversion_mapa = 1.0125;
       this.setTeclas("S: abajo");
       this.setTeclas("D: derecha");
 
+      this.setTeclas("C: cambiar cámara");
       this.setTeclas("P: pausa");
       this.setTeclas("M: iniciar/pausar música");
       this.setTeclas("R: reiniciar");
@@ -367,7 +398,27 @@ const factor_conversion_mapa = 1.0125;
     }
   }
 
-  //Si la cabeza del snake esta en una fruta, procesa su acción. Además borra la fruta actual, y crea otra en una posicion random
+  //////////////////////////////////////////////////
+  // FIN TECLADO
+  //////////////////////////////////////////////////
+
+
+  //////////////////////////////////////////////////
+  // COMIDA
+  //////////////////////////////////////////////////
+
+  //Obtiene una celda random vacia, dado un limite de x y limite de y
+  obtenerCeldaRandomVacia(max1, max2){
+
+    do {
+      var pos_x = Math.floor(Math.random() * max1);
+      var pos_y = Math.floor(Math.random() * max2);
+    } while (this.snake.getCeldaMatriz(pos_y, pos_x) != ValoresMatriz.VACIO); // obtener casilla aleatoria que no esté ocupada 
+
+    return {pos_x, pos_y}; // floor devuelve entero
+  }
+
+  // Si la cabeza del snake esta en una fruta, procesa su acción. Además borra la fruta actual, y crea otra en una posicion random
   procesarComida(){
     var fila_cabeza = this.snake.getFilaCabeza();
     var columna_cabeza = this.snake.getColumnaCabeza();
@@ -417,17 +468,6 @@ const factor_conversion_mapa = 1.0125;
       this.bomba.destruirBomba();
       this.remove(this.bomba);
     }
-  }
-
-  //Obtiene una celda random vacia, dado un limite de x y limite de y
-  obtenerCeldaRandomVacia(max1, max2){
-    
-    do {
-      var pos_x = Math.floor(Math.random() * max1);
-      var pos_y = Math.floor(Math.random() * max2);
-    } while (this.snake.getCeldaMatriz(pos_y, pos_x) != ValoresMatriz.VACIO); // obtener casilla aleatoria que no esté ocupada 
-
-    return {pos_x, pos_y}; // floor devuelve entero
   }
 
   // Crea todas las frutas en posiciones aleatorias que no estén previamente ocupadas
@@ -521,6 +561,11 @@ const factor_conversion_mapa = 1.0125;
     this.add (this.naranja);
   }
 
+
+  //////////////////////////////////////////////////
+  // FIN COMIDA
+  //////////////////////////////////////////////////
+
   update () {
     // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
     this.renderer.render (this, this.getCamera());
@@ -532,6 +577,19 @@ const factor_conversion_mapa = 1.0125;
     {
       if (!this.pausa)
       {
+
+        if (this.cambio_camara)
+        {
+          //var offset = new THREE.Vector3(this.snake.segmentosSnake[0].position.x+10, this.snake.segmentosSnake[0].position.y, this.snake.segmentosSnake[0].position.z+20);
+          //this.camera.position.lerp(offset, 0.1);
+          this.camera.lookAt(this.snake.segmentosSnake[0].position.x, this.snake.segmentosSnake[0].position.y);
+          //this.camera.position.set(this.snake.segmentosSnake[0].position.x, this.snake.segmentosSnake[0].position.y, this.snake.segmentosSnake[0].position.z+20)
+        }
+
+        //this.target.set(this.snake.segmentosSnake[0].position.x, this.snake.segmentosSnake[0].position.y, this.snake.segmentosSnake[0].position.z);
+        //this.snake.segmentosSnake[0].getWorldPosition(this.target);
+        //this.camera.lookAt(this.target);
+
         this.snake.update();
 
         //Para evitar hacer get en una casilla fuera de índice y haya error por los indices
@@ -560,15 +618,14 @@ const factor_conversion_mapa = 1.0125;
 
 // Matriz de Snake con enteros
 // 0 - libre
-// 1 - serpentina
-// this.snake.metodo cambiar matriz y ahi la vaina
+// 1 - serpiente
 // 2 - manzana
 // 3 - naranja
 // 4 - pera
 // 5 - uva
 // 6 - bomba
 
-/// La función   main
+// La función main
 $(function () {
   
   // Se instancia la escena pasándole el  div  que se ha creado en el html para visualizar
