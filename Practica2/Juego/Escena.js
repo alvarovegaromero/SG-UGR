@@ -27,11 +27,15 @@ Apartados:
 - camara
 - dispose (eliminar serpiente y frutas)
 - textura
+- raton TODO
  */
 
 
 //El tablero no es perfecto, cada casilla mide 1.0125. Por eso, necesitamos convertir un valor de la matriz a la posicion real con este factor
 const factor_conversion_mapa = 1.0125;
+
+//Tamaño que ocupa el borde del tablero en X e Y
+const tamanio_borde = 0.45;
 
  class MyScene extends THREE.Scene {
   // Recibe el  div  que se ha creado en el  html  que va a ser el lienzo en el que mostrar
@@ -138,7 +142,7 @@ const factor_conversion_mapa = 1.0125;
     this.gameover = new THREE.Audio(listener);
 
     const audioLoader = new THREE.AudioLoader();
-    audioLoader.load('./Musica/gameover.mp3',
+    audioLoader.load('./Musica/gameover2.mp3',
     function (buffer){
       that.gameover.setBuffer(buffer);
       that.gameover.setLoop(false);
@@ -177,7 +181,6 @@ const factor_conversion_mapa = 1.0125;
   // FIN MÚSICA
   //////////////////////////////////////////////////
 
-
   //////////////////////////////////////////////////
   // FUNCIONES DE LA ESCENA
   //////////////////////////////////////////////////
@@ -206,6 +209,27 @@ const factor_conversion_mapa = 1.0125;
     
   }
 
+  createCamera2 () {
+    this.camera2 = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    
+    //var look = new THREE.Vector3 (this.tamTableroX/2,this.tamTableroY/2,0);
+    var look = new THREE.Vector3 (8,8,0);
+
+    //this.camera2.lookAt(look);
+    this.add (this.camera2);
+    
+    // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
+    this.camera2Control = new TrackballControls (this.camera2, this.renderer.domElement);
+    
+    // Se configuran las velocidades de los movimientos
+    this.camera2Control.rotateSpeed = 5;
+    this.camera2Control.zoomSpeed = -2;
+    this.camera2Control.panSpeed = 0.5;
+    // Debe orbitar con respecto al punto de mira de la cámara
+    this.camera2Control.target = look;
+    
+  }
+
   createGround () {
     
     // La geometría es una caja con muy poca altura
@@ -214,15 +238,15 @@ const factor_conversion_mapa = 1.0125;
     var texture = new THREE.TextureLoader().load('./Imagenes/cesped3.0.jpg');
     var materialGround = new THREE.MeshPhongMaterial ({map: texture});
     
-    var ground = new THREE.Mesh (geometryGround, materialGround);
+    this.ground = new THREE.Mesh (geometryGround, materialGround);
     
     // El suelo lo bajamos la mitad de su altura para que el origen del mundo se quede en su lado superior
-    ground.position.z = -0.1;
+    this.ground.position.z = -0.1;
 
-    ground.position.x += this.tamTableroX/2;
-    ground.position.y += this.tamTableroY/2;
+    this.ground.position.x += this.tamTableroX/2;
+    this.ground.position.y += this.tamTableroY/2;
 
-    this.add (ground);
+    this.add (this.ground);
   }
   
   createGUI () {
@@ -358,9 +382,8 @@ const factor_conversion_mapa = 1.0125;
 
         this.eliminarFrutas(); //Eliminar material y geometría de las frutas
 
-        /////////////////////////////////////////////////////////////////// 
-        this.renderer.renderLists.dispose(); // PREGUNTAR SI ESTA BIEN Y SI ES NECESARI ESTA LINEA  //Borrar de memoria
-        ///////////////////////////////////////////////////////////////////
+        // Limpieza de memoria
+        this.renderer.renderLists.dispose();
       }
 
       if (!this.muted)
@@ -392,6 +415,9 @@ const factor_conversion_mapa = 1.0125;
       this.inicioJuego = true;
       this.snake = new Snake(this.tamTableroX, this.tamTableroY, this.numeroCasillasX, this.numeroCasillasY);
 
+      this.createCamera2();
+      this.camera2.lookAt(this.snake.segmentosSnake[0].position.x+10, this.snake.segmentosSnake[0].position.y+55, -150);
+
       this.crearFrutas();
       
       this.add(this.snake);
@@ -401,6 +427,30 @@ const factor_conversion_mapa = 1.0125;
   //////////////////////////////////////////////////
   // FIN TECLADO
   //////////////////////////////////////////////////
+
+  // Raton
+
+  leerRaton(evento){
+
+    var objetos = [this.ground];
+
+    var mouse = new THREE.Vector2 ();
+
+    mouse.x = (evento.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = 1 - 2 * (evento.clientY / window.innerHeight);
+
+    var raycaster = new THREE.Raycaster ();
+    raycaster.setFromCamera(mouse, this.camera);
+
+    const pickedObjects = raycaster.intersectObjects(objetos, true);
+
+    if(pickedObjects.length > 0)
+    {
+      var punto_seleccionado = new THREE.Vector3( pickedObjects[0].point)
+
+      console.log(punto_seleccionado.x); 
+    }
+  }
 
 
   //////////////////////////////////////////////////
@@ -571,7 +621,7 @@ const factor_conversion_mapa = 1.0125;
     this.renderer.render (this, this.getCamera());
 
     // Se actualiza la posición de la cámara según su controlador
-    this.cameraControl.update(); //- Comentado no permite hacer zoom con rueda
+    this.cameraControl.update(); 
 
     if(this.inicioJuego) //Si ha iniciado, haz el update del snake
     {
@@ -580,10 +630,11 @@ const factor_conversion_mapa = 1.0125;
 
         if (this.cambio_camara)
         {
-          //var offset = new THREE.Vector3(this.snake.segmentosSnake[0].position.x+10, this.snake.segmentosSnake[0].position.y, this.snake.segmentosSnake[0].position.z+20);
-          //this.camera.position.lerp(offset, 0.1);
-          this.camera.lookAt(this.snake.segmentosSnake[0].position.x, this.snake.segmentosSnake[0].position.y);
-          //this.camera.position.set(this.snake.segmentosSnake[0].position.x, this.snake.segmentosSnake[0].position.y, this.snake.segmentosSnake[0].position.z+20)
+          this.renderer.render (this, this.camera2);
+          var offset = new THREE.Vector3(this.snake.segmentosSnake[0].position.x, this.snake.segmentosSnake[0].position.y-6, this.snake.segmentosSnake[0].position.z+14);
+          
+          // Cambia la posicion de la cámara. Lerp interpola entre la posición de la cámara y el offset. No es necesario obtener la posiciones mundiales
+          this.camera2.position.lerp(offset, 0.05);
         }
 
         //this.target.set(this.snake.segmentosSnake[0].position.x, this.snake.segmentosSnake[0].position.y, this.snake.segmentosSnake[0].position.z);
@@ -634,6 +685,7 @@ $(function () {
   // Se añaden los listener de la aplicación. En este caso, el que va a comprobar cuándo se modifica el tamaño de la ventana de la aplicación.
   window.addEventListener ("resize", () => scene.onWindowResize());
   window.addEventListener ("keydown", (event) => scene.leerTeclado(event)); //Cuando se pulse la tecla, salta el listener
+  window.addEventListener ( "mousedown" , (event) => scene.leerRaton(event) ) ;
 
   // Que no se nos olvide, la primera visualización.
   scene.update();

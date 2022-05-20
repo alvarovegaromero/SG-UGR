@@ -48,18 +48,23 @@ class Snake extends THREE.Object3D{
         this.contadorSegundos = 1; //Velocidad inicial de la serpiente
         this.total_delta = 0;
 
+
+        //Crear textura, geometria y material comun a la serpiente
+        this.texture = new THREE.TextureLoader().load('./Imagenes/serpiente2.jpg');
+        this.geometria = new THREE.CylinderGeometry(1/2, 1/2, 1);
+        this.geometria.rotateY(Math.PI);
+        
+        this.geometria.translate(0,0,0.4);
+        this.material = new THREE.MeshPhongMaterial({map: this.texture});
+
         ///////////////////////////////
         // CREAR y COLOCAR LA CABESA - PIEZA INICIAL
 
-        this.texture = new THREE.TextureLoader().load('./Imagenes/serpiente2.jpg');
         var texture_cabeza = new THREE.TextureLoader().load('./Imagenes/cabeza.jpg');
-
-        this.geometria = new THREE.CylinderGeometry(1/2, 1/2, 1);
-        this.geometria.translate(0,0,0.4);
-        this.material = new THREE.MeshPhongMaterial({map: this.texture});
-        var material_cabeza = new THREE.MeshPhongMaterial({map: texture_cabeza});
-        var cabeza = new THREE.Mesh(this.geometria, material_cabeza);
-
+        var materiales_cabeza = [new THREE.MeshPhongMaterial({map: texture_cabeza}), new THREE.MeshPhongMaterial({map: this.texture}), new THREE.MeshPhongMaterial({map: this.texture})];
+        
+        var cabeza = new THREE.Mesh(this.geometria, materiales_cabeza);
+        
         cabeza.position.set(dimensionesX/2-this.tamX/2, dimensionesY/2-this.tamY/2, 0); //Colocarlo abajo e izquierda del centro. Posicion inicial
    
         this.add(cabeza);
