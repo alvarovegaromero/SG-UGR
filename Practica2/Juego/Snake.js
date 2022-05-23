@@ -48,23 +48,58 @@ class Snake extends THREE.Object3D{
         this.contadorSegundos = 1; //Velocidad inicial de la serpiente
         this.total_delta = 0;
 
-
-        //Crear textura, geometria y material comun a la serpiente
-        this.texture = new THREE.TextureLoader().load('./Imagenes/serpiente2.jpg');
-        this.geometria = new THREE.CylinderGeometry(1/2, 1/2, 1);
-        this.geometria.rotateY(Math.PI);
-        
-        this.geometria.translate(0,0,0.4);
-        this.material = new THREE.MeshPhongMaterial({map: this.texture});
-
         ///////////////////////////////
         // CREAR y COLOCAR LA CABESA - PIEZA INICIAL
 
+        //Crear textura, geometria y material comun a la serpiente
+        this.texture = new THREE.TextureLoader().load('./Imagenes/serpiente2.jpg');
+        this.texture.wrapS = this.texture.wrapT = THREE.RepeatWrapping;
+        this.texture.repeat.set( 0.3, 0.3 );
+        this.texture.needsUpdate = true;
+        
+        this.geometria_cabeza = new THREE.CylinderGeometry(0.5, 0.5, 1);
+        this.geometria_cabeza.translate(0.4,0,0);
+        this.geometria_cabeza.rotateY(-Math.PI/2);
+        
+        this.material = new THREE.MeshPhongMaterial({map: this.texture});
+
+
+        // Crear cubos redondeados
+        var shape = new THREE.Shape();
+        shape.moveTo(0.25,0.25);
+        shape.lineTo(0.5,0.25);
+        shape.quadraticCurveTo(0.75,0.25, 0.75,0.5);
+
+        shape.lineTo(0.75,0.75);
+        shape.quadraticCurveTo(0.75,1, 0.5,1);
+
+        shape.lineTo(0.25,1);
+        shape.quadraticCurveTo(0,1, 0,0.75);
+
+        shape.lineTo(0,0.5);
+        shape.quadraticCurveTo(0,0.25, 0.25,0.25);
+        
+        const extrudeSettings = {
+        steps: 2,
+        depth: 1,
+        bevelEnabled: true,
+        bevelThickness: 0.75,
+        bevelSize: 1,
+        bevelOffset: 0,
+        bevelSegments: 3
+        };
+    
+        this.geometria = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+        this.geometria.translate(-0.4, 0, -0.5);
+        this.geometria.scale(0.35, 0.3, 0.45);
+        this.geometria.rotateX(Math.PI/2);
+
+        // Evitar que la textura de la cara se estire y no se vea bien los ojos y boca
         var texture_cabeza = new THREE.TextureLoader().load('./Imagenes/cabeza.jpg');
+        texture_cabeza.repeat.set(2,1);
         var materiales_cabeza = [new THREE.MeshPhongMaterial({map: texture_cabeza}), new THREE.MeshPhongMaterial({map: this.texture}), new THREE.MeshPhongMaterial({map: this.texture})];
         
-        var cabeza = new THREE.Mesh(this.geometria, materiales_cabeza);
-        
+        var cabeza = new THREE.Mesh(this.geometria_cabeza, materiales_cabeza);
         cabeza.position.set(dimensionesX/2-this.tamX/2, dimensionesY/2-this.tamY/2, 0); //Colocarlo abajo e izquierda del centro. Posicion inicial
    
         this.add(cabeza);

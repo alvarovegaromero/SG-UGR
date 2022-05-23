@@ -43,6 +43,9 @@ const tamanio_borde = 0.45;
   constructor (myCanvas) { 
     super();
 
+    this.axis = new THREE.AxesHelper (5);
+    this.add (this.axis);
+
     //this.target = new THREE.Object3D();
 
     // Incluye los bordes del tablero
@@ -194,9 +197,6 @@ const tamanio_borde = 0.45;
     //var look = new THREE.Vector3 (this.tamTableroX/2,this.tamTableroY/2,0);
     var look = new THREE.Vector3 (8,8,0);
 
-    this.camera.lookAt(look);
-    this.add (this.camera);
-    
     // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
     this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
     
@@ -206,7 +206,9 @@ const tamanio_borde = 0.45;
     this.cameraControl.panSpeed = 0.5;
     // Debe orbitar con respecto al punto de mira de la cámara
     this.cameraControl.target = look;
-    
+
+    this.camera.lookAt(look);
+    this.add (this.camera);
   }
 
   createCamera2 () {
@@ -656,9 +658,10 @@ const tamanio_borde = 0.45;
   update () {
     // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
     this.renderer.render (this, this.getCamera());
+    
+    this.cameraControl.update(); // quitar si no se quiere controlar cámara con ratón
 
     // Se actualiza la posición de la cámara según su controlador
-    this.cameraControl.update(); 
 
     if(this.inicioJuego) //Si ha iniciado, haz el update del snake
     {
