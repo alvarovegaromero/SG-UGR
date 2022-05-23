@@ -20,16 +20,9 @@ Apartados:
 - Música
 - Funciones de la escena
 - Teclado
+- Raton
 - Comida
 */
-
-/*
-- camara
-- dispose (eliminar serpiente y frutas)
-- textura
-- raton TODO
- */
-
 
 //El tablero no es perfecto, cada casilla mide 1.0125. Por eso, necesitamos convertir un valor de la matriz a la posicion real con este factor
 const factor_conversion_mapa = 1.0125;
@@ -42,11 +35,6 @@ const tamanio_borde = 0.45;
   // la visualización de la escena
   constructor (myCanvas) { 
     super();
-
-    this.axis = new THREE.AxesHelper (5);
-    this.add (this.axis);
-
-    //this.target = new THREE.Object3D();
 
     // Incluye los bordes del tablero
     this.tamTableroX = 17;
@@ -84,6 +72,10 @@ const tamanio_borde = 0.45;
   // Enseñar un mensaje por pantalla
   clearMessage(){
     document.getElementById ("Messages").innerHTML = "";
+  }
+
+  clearGameOver(){
+    document.getElementById ("gameover").innerHTML = "";
   }
 
   // Limpia apartado mensajes
@@ -211,24 +203,13 @@ const tamanio_borde = 0.45;
     this.add (this.camera);
   }
 
+  // Cámara perspectiva que sigue a la serpiente
   createCamera2 () {
     this.camera2 = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
     
-    //var look = new THREE.Vector3 (this.tamTableroX/2,this.tamTableroY/2,0);
-    var look = new THREE.Vector3 (8,8,0);
+    this.camera2.lookAt(this.snake.segmentosSnake[0].position.x+10, this.snake.segmentosSnake[0].position.y+55, -150);
 
-    //this.camera2.lookAt(look);
     this.add (this.camera2);
-    
-    // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
-    this.camera2Control = new TrackballControls (this.camera2, this.renderer.domElement);
-    
-    // Se configuran las velocidades de los movimientos
-    this.camera2Control.rotateSpeed = 5;
-    this.camera2Control.zoomSpeed = -2;
-    this.camera2Control.panSpeed = 0.5;
-    // Debe orbitar con respecto al punto de mira de la cámara
-    this.camera2Control.target = look;
     
   }
 
@@ -394,6 +375,7 @@ const tamanio_borde = 0.45;
       this.reproducido = false; // controla si se ha reproducido el sonido de gameover
 
       this.clearMessage();
+      this.clearGameOver();
       this.clearTeclas();
       this.setMessage("Las posibles frutas son:");
       
@@ -418,7 +400,6 @@ const tamanio_borde = 0.45;
       this.snake = new Snake(this.tamTableroX, this.tamTableroY, this.numeroCasillasX, this.numeroCasillasY);
 
       this.createCamera2();
-      this.camera2.lookAt(this.snake.segmentosSnake[0].position.x+10, this.snake.segmentosSnake[0].position.y+55, -150);
 
       this.crearFrutas();
       
@@ -434,7 +415,7 @@ const tamanio_borde = 0.45;
   // RATON
   //////////////////////////////////////////////////
 
-  // Leer una posicion del
+  // Leer una posicion de la ventana
   leerRaton(evento){
 
     var objetos = [this.ground]; //Objetos seleccionables - El tablero sobre el que haremos click
@@ -460,11 +441,6 @@ const tamanio_borde = 0.45;
 
       var distancia_x = coordenada_x - this.snake.getColumnaCabeza(); //Distancia al punto que ha clickado 
       var distancia_y = coordenada_y - this.snake.getFilaCabeza();
-
-      /*
-      console.log("Distancia x:", distancia_x); 
-      console.log("Distancia y:", distancia_y); 
-      */
 
       // La serpiente irá a la dirección en la que haya más distancia
       // Destacamos que no se puede cambiar el sentido directamente debido a los condicionales del metodo CambiarDireccion
@@ -659,8 +635,6 @@ const tamanio_borde = 0.45;
     // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
     this.renderer.render (this, this.getCamera());
     
-    this.cameraControl.update(); // quitar si no se quiere controlar cámara con ratón
-
     // Se actualiza la posición de la cámara según su controlador
 
     if(this.inicioJuego) //Si ha iniciado, haz el update del snake
@@ -676,10 +650,6 @@ const tamanio_borde = 0.45;
           // Cambia la posicion de la cámara. Lerp interpola entre la posición de la cámara y el offset. No es necesario obtener la posiciones mundiales
           this.camera2.position.lerp(offset, 0.05);
         }
-
-        //this.target.set(this.snake.segmentosSnake[0].position.x, this.snake.segmentosSnake[0].position.y, this.snake.segmentosSnake[0].position.z);
-        //this.snake.segmentosSnake[0].getWorldPosition(this.target);
-        //this.camera.lookAt(this.target);
 
         this.snake.update();
 

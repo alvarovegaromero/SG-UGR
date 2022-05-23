@@ -64,7 +64,23 @@ class Snake extends THREE.Object3D{
         this.material = new THREE.MeshPhongMaterial({map: this.texture});
 
 
-        // Crear cubos redondeados
+        // Evitar que la textura de la cara se estire y no se vea bien los ojos y boca
+        var texture_cabeza = new THREE.TextureLoader().load('./Imagenes/cabeza.jpg');
+        texture_cabeza.repeat.set(2,1);
+        var materiales_cabeza = [new THREE.MeshPhongMaterial({map: texture_cabeza}), new THREE.MeshPhongMaterial({map: this.texture}), new THREE.MeshPhongMaterial({map: this.texture})];
+        
+        var cabeza = new THREE.Mesh(this.geometria_cabeza, materiales_cabeza);
+        cabeza.position.set(dimensionesX/2-this.tamX/2, dimensionesY/2-this.tamY/2, 0); //Colocarlo abajo e izquierda del centro. Posicion inicial
+   
+        this.add(cabeza);
+
+        // Añadir cabeza a segmentosSnake y poner a TRUE que esta ocupada esa poisicion
+        this.segmentosSnake.push(cabeza); //Metemos la cabeza lo primero
+
+        //Marcamos la pos inicial como ocupada
+        this.matriz[this.conviertePosicionEnIndice(cabeza.position.y)][this.conviertePosicionEnIndice(cabeza.position.x)] = ValoresMatriz.SERPIENTE; 
+    
+        // Crear cubos redondeados para el resto de segmentos
         var shape = new THREE.Shape();
         shape.moveTo(0.25,0.25);
         shape.lineTo(0.5,0.25);
@@ -93,22 +109,6 @@ class Snake extends THREE.Object3D{
         this.geometria.translate(-0.4, 0, -0.5);
         this.geometria.scale(0.35, 0.3, 0.45);
         this.geometria.rotateX(Math.PI/2);
-
-        // Evitar que la textura de la cara se estire y no se vea bien los ojos y boca
-        var texture_cabeza = new THREE.TextureLoader().load('./Imagenes/cabeza.jpg');
-        texture_cabeza.repeat.set(2,1);
-        var materiales_cabeza = [new THREE.MeshPhongMaterial({map: texture_cabeza}), new THREE.MeshPhongMaterial({map: this.texture}), new THREE.MeshPhongMaterial({map: this.texture})];
-        
-        var cabeza = new THREE.Mesh(this.geometria_cabeza, materiales_cabeza);
-        cabeza.position.set(dimensionesX/2-this.tamX/2, dimensionesY/2-this.tamY/2, 0); //Colocarlo abajo e izquierda del centro. Posicion inicial
-   
-        this.add(cabeza);
-
-        // Añadir cabeza a segmentosSnake y poner a TRUE que esta ocupada esa poisicion
-        this.segmentosSnake.push(cabeza); //Metemos la cabeza lo primero
-
-        //Marcamos la pos inicial como ocupada
-        this.matriz[this.conviertePosicionEnIndice(cabeza.position.y)][this.conviertePosicionEnIndice(cabeza.position.x)] = ValoresMatriz.SERPIENTE; 
     }
 
     // Destruir todos los meshes, geometrías y materiales de todos los segmentos de la serpiente
@@ -130,6 +130,10 @@ class Snake extends THREE.Object3D{
 
     setMessage (str) {
         document.getElementById ("Messages").innerHTML += "<h2>"+str+"</h2>";
+    }
+
+    setGameOver (str) {
+        document.getElementById ("gameover").innerHTML += "<h2>"+str+"</h2>";
     }
 
     //////////////////////////////////////////////////
@@ -339,7 +343,7 @@ class Snake extends THREE.Object3D{
         this.finPartida = true;
 
         this.clearMessage();
-        this.setMessage("¡HAS PERDIDO!");
+        this.setGameOver("GAME OVER");
         this.setMessage("Pulsa R para reiniciar");
     }
 
