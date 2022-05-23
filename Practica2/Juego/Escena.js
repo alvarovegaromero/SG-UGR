@@ -428,11 +428,14 @@ const tamanio_borde = 0.45;
   // FIN TECLADO
   //////////////////////////////////////////////////
 
-  // Raton
+  //////////////////////////////////////////////////
+  // RATON
+  //////////////////////////////////////////////////
 
+  // Leer una posicion del
   leerRaton(evento){
 
-    var objetos = [this.ground];
+    var objetos = [this.ground]; //Objetos seleccionables - El tablero sobre el que haremos click
 
     var mouse = new THREE.Vector2 ();
 
@@ -442,16 +445,50 @@ const tamanio_borde = 0.45;
     var raycaster = new THREE.Raycaster ();
     raycaster.setFromCamera(mouse, this.camera);
 
-    const pickedObjects = raycaster.intersectObjects(objetos, true);
+    const pickedObjects = raycaster.intersectObjects(objetos, true); //Ver los objetos sobre los que hizo pick (aunque realmente solo hay un objeto)
 
     if(pickedObjects.length > 0)
     {
-      var punto_seleccionado = new THREE.Vector3( pickedObjects[0].point)
+      var punto_seleccionado = new THREE.Vector3(pickedObjects[0].point) //Ver el punto en el que hizo click
 
-      console.log(punto_seleccionado.x); 
+      // Nos quedamos con las coordenadas que marcó
+      // Coonvertimos las coordenadas a enteros, que representan el indice de la matriz que se ha clickado
+      var coordenada_x = Math.trunc((punto_seleccionado.x.x-tamanio_borde)/factor_conversion_mapa);
+      var coordenada_y = Math.trunc((punto_seleccionado.x.y-tamanio_borde)/factor_conversion_mapa);
+
+      var distancia_x = coordenada_x - this.snake.getColumnaCabeza(); //Distancia al punto que ha clickado 
+      var distancia_y = coordenada_y - this.snake.getFilaCabeza();
+
+      /*
+      console.log("Distancia x:", distancia_x); 
+      console.log("Distancia y:", distancia_y); 
+      */
+
+      // La serpiente irá a la dirección en la que haya más distancia
+      // Destacamos que no se puede cambiar el sentido directamente debido a los condicionales del metodo CambiarDireccion
+
+      if(Math.abs(distancia_x) > Math.abs(distancia_y)) // Si la distancia de X es mayor que Y. Iremos a la izq o dcha
+      {
+        if(distancia_x > 0) //Si la diferencia es positiva, la posicion marcada esta a la derecha
+          this.snake.cambiarDireccion(Direcciones.DERECHA);
+        else
+          this.snake.cambiarDireccion(Direcciones.IZQUIERDA);
+      }
+
+      else if (Math.abs(distancia_x) < Math.abs(distancia_y)) // Si la distancia de X es mayor que Y. Iremos arriba o abajo
+      {
+        if(distancia_y > 0) //Si la diferencia es positiva, la posicion marcada esta arriba
+          this.snake.cambiarDireccion(Direcciones.ARRIBA);
+        else
+          this.snake.cambiarDireccion(Direcciones.ABAJO);
+      }
+      //En caso de empate entre distancias, no hacemos nada
     }
   }
 
+  //////////////////////////////////////////////////
+  // FIN RATON
+  //////////////////////////////////////////////////
 
   //////////////////////////////////////////////////
   // COMIDA
