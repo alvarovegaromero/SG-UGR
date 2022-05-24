@@ -51,6 +51,9 @@ class Snake extends THREE.Object3D{
         /////////////////////////////////////////////////////////////
         //Crear textura, geometria y material comun de la la serpiente
         this.texture = new THREE.TextureLoader().load('./Imagenes/serpiente2.jpg');
+
+        // La textura presentaba problemas en el extrude, por lo que indicamos que la textura
+        // se repita en los dos ejes y la repetimos muchas veces para poder conseguir la aprariencia de escama
         this.texture.wrapS = this.texture.wrapT = THREE.RepeatWrapping;
         this.texture.repeat.set( 0.3, 0.3 );
         this.texture.needsUpdate = true;
@@ -94,7 +97,10 @@ class Snake extends THREE.Object3D{
         this.geometria_cabeza.rotateY(-Math.PI/2);
 
         var texture_cabeza = new THREE.TextureLoader().load('./Imagenes/cabeza.jpg');
-        texture_cabeza.repeat.set(2,1);
+
+        // repetir la textura alrededor del cilindro dos veces para que no se estirara la cara demasiado
+        // por tanto la cara sale repetida dos veces, pero una de ellas no se ve
+        texture_cabeza.repeat.set(2,1); 
         var materiales_cabeza = [new THREE.MeshPhongMaterial({map: texture_cabeza}), new THREE.MeshPhongMaterial({map: this.texture}), new THREE.MeshPhongMaterial({map: this.texture})];
         
         var cabeza = new THREE.Mesh(this.geometria_cabeza, materiales_cabeza);
