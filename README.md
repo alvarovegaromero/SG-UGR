@@ -1,5 +1,6 @@
 # SG-UG
-Prácticas de la asignatura "Sistemas Gráficos" del curso 2021-2022 / Practices of the subject "Graphic Systems" (SG) - Degree in Computer Engineering 2021-2022
+Lab ork of the subject "Graphic Systems" (SG) - Degree in Computer Engineering 2021-2022
 
-Primera parte de la asignatura consistía en realizar una serie de ejercicios básicos.
-La segunda parte, se basó en realizar un proyecto más complejo. El proyecto fue hacer un Snake3D junto a mi compañero David Correa Rodríguez (@wastedavid). Para jugar al juego, se puede hacer descargando los ficheros y abriendo un servidor con Python o bien en el siguiente enlace: https://alvarovegaromero.github.io/Snake3D/
+The first part of the course consisted of a series of basic exercises.
+The second part was based on a more complex project. The project was to make a Snake3D together with my partner David Correa Rodríguez (@davidcr01). 
+In order to play the game, you can do it by downloading the files and opening a server with Python or in the following link: https://alvarovegaromero.github.io/Snake3D/
